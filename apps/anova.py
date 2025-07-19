@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 import plotly.tools as tls
 import plotly.express as px
 
-FOLDER = Path("/home/slozgom/personal/tfg_project/xperiments/experimentos_con_cnn")
+FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
 
 experiment_variables = ["agent", "algorithm", "n_agents", "type", "network"]
 agent_variables = [
@@ -92,16 +92,33 @@ for PATH in experiments_list:
         df.loc[len(df)] = row
 
 data = df[["type", "network", "minimum_loss_achieved"]]
-data.groupby(["type", "network"])["minimum_loss_achieved"].agg(["mean", "std"])
 
 lista = []
 for i, t in enumerate(data.type.unique()):
     for j, n in enumerate(data.network.unique()):
         p = data.minimum_loss_achieved[(data.type == t) & (data.network == n)]
         lista.append([t, n, p.mean()])
+        
 f = pd.DataFrame(lista, columns=["x", "trace", "response"])
-fig1 = px.scatter(f, x="x", y="response", color="trace")
-fig2 = px.line(f, x="x", y="response", color="trace")
+fig1 = px.scatter(f, x="x", y="response", color="trace", title="Interaction plot: Network and Type", labels={
+                     "x": "Type",
+                     "response": "Avg Minimum loss achieved",
+                     "trace": "Network"
+                 },).update_traces(mode='lines+markers')
+
+
+lista = []
+for i, t in enumerate(data.type.unique()):
+    for j, n in enumerate(data.network.unique()):
+        p = data.minimum_loss_achieved[(data.type == t) & (data.network == n)]
+        lista.append([n, t, p.mean()])
+        
+f = pd.DataFrame(lista, columns=["x", "trace", "response"])
+fig2 = px.scatter(f, x="x", y="response", color="trace", title="Interaction plot: Type and Network", labels={
+                     "x": "Network",
+                     "response": "Avg Minimum loss achieved",
+                     "trace": "Type"
+                 },).update_traces(mode='lines+markers')
 
 fig1_traces = []
 fig2_traces = []
@@ -113,16 +130,16 @@ for trace in range(len(fig2["data"])):
     fig2_traces.append(t)
 
 fig = make_subplots(
-    rows=1,
-    cols=2,
+    rows=2,
+    cols=1,
     start_cell="top-left",
 )
 
 for traces in fig1_traces:
     fig.append_trace(traces, row=1, col=1)
 for traces in fig2_traces:
-    fig.append_trace(traces, row=1, col=2)
+    fig.append_trace(traces, row=2, col=1)
 
-fig.update_layout(height=500, width=1100)
+fig.update_layout(height=1200, width=900)
 fig.write_html("index.html")
 print("Figure CREATED!")

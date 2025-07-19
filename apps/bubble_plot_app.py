@@ -1,13 +1,10 @@
 from pathlib import Path
 from pandas import read_csv
 import numpy as np
-import plotly.tools as tls
 import plotly.graph_objects as go
-from pydantic import BaseModel
-from typing import List, Any
 
 
-FOLDER = Path("/home/slozgom/personal/tfg_project/xperiments/experimentos_con_cnn")
+FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
 experiments_list = list(FOLDER.iterdir())
 PATH = experiments_list[14]
 
