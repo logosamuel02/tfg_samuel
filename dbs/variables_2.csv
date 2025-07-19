@@ -1,0 +1,38 @@
+variable,legend,description
+sender,Sender,Sender
+layer,Layer,Layer
+start_timestamp,Start timestamp,Start timestamp
+test_recall,Test recall,Test recall
+epoch,Epoch,Epoch
+label,Label,Label
+thread,Thread,Thread
+description,Description,Description
+validation_precision,Validation precision,Validation precision
+to,To,To
+agent,Agent,Agent
+validation_recall,Validation recall,Validation recall
+test_loss,Test loss,Test loss
+epoch_or_iteration,Epoch or iteration,Epoch or iteration
+seconds_to_complete_test,Seconds to complete test,Seconds to complete test
+test_accuracy,Test accuracy,Test accuracy
+test_f1_score,Test f1 score,Test f1 score
+recall,Recall,Recall
+f1_score,F1 score,F1 score
+validation_loss,Validation loss,Validation loss
+log_name,Log name,Log name
+log_timestamp,Log timestamp,Log timestamp
+weight,Weight,Weight
+accuracy,Accuracy,Accuracy
+size,Size,Size
+count,Count,Count
+validation_accuracy,Validation accuracy,Validation accuracy
+type,Type,Type
+algorithm_round,Algorithm round,Algorithm round
+test_precision,Test precision,Test precision
+precision,Precision,Precision
+seconds_to_complete,Seconds to complete,Seconds to complete
+loss,Loss,Loss
+seconds_to_complete_validation,Seconds to complete validation,Seconds to complete validation
+timestamp,Timestamp,Timestamp
+validation_f1_score,Validation f1 score,Validation f1 score
+weight_id,Weight id,Weight id

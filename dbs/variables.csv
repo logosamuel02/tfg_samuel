@@ -1,0 +1,44 @@
+variable,legend,description
+test_precision,Test precision,Test precision
+description,Learning phase,Learning phase
+epoch_or_iteration,Epoch or iteration,"Epoch or iteration. Epochs are related to train, valdiation ot test phases, but iterations are related to Consensus phases."
+epoch,Training Epoch,Training Epoch
+type,Type of the message,Type of the message
+seconds_to_complete,Seconds elapsed per training round,Seconds elapsed per training round
+loss,Training Loss,Training Loss
+seconds_to_complete_test,Seconds elapsed per test round,Seconds elapsed per test round
+validation_recall,Validation recall,Validation recall
+seconds_to_complete_validation,Seconds elapsed per validation round,Seconds elapsed per validation round
+log_timestamp,Timestamp,Timestamp
+test_loss,Test loss,Test loss
+size,Size,Size
+layer,ANN layer,ANN Layer
+algorithm_round,Algorithm round,Algorithm round
+accuracy,Training Accuracy,Training Accuracy
+start_timestamp,Start timestamp,Start timestamp
+count,Sample count,Sample count
+agent,Agent,Agent
+timestamp,Timestamp,Timestamp
+weight,Mean of the weights,Mean of thes weights
+weight_id,Weight id,Weight id
+to,Agent Receiver,Agent Receiver
+test_accuracy,Test accuracy,Test accuracy
+precision,Training Precision, Training Precision
+thread,Conversation Thread,Conversation Thread
+test_recall,Test recall,Test recall
+validation_loss,Validation loss,Validation loss
+sender,Agent Sender,Agent Sender
+label,Data Label,Data Label
+recall,Training Recall,Training Recall
+log_name,Agent Name,Agent Name
+f1_score,Training F1 score,Training F1 score
+validation_f1_score,Validation f1 score,Validation f1 score
+validation_accuracy,Validation accuracy,Validation accuracy
+test_f1_score,Test f1 score,Test f1 score
+validation_precision,Validation precision,Validation precision
+minimum_loss_achieved,Minimum loss achieved,Minimum loss achieved
+maximum_accuracy_achieved,Maximum accuracy achieved,Maximum accuracy achieved
+maximum_recall_achieved,Maximum recall achieved,Maximum recall achieved
+maximum_precision_achieved,Maximum precision achieved,Maximum precision achieved
+maximum_f1_achieved,Maximum f1 score achieved,Maximum f1 score achieved
+mean_seconds_by_round,Mean Seconds by Round,Mean Seconds by Round
