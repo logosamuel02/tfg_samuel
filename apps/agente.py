@@ -6,30 +6,16 @@ from spade import wait_until_finished
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 
-import plotly.express as px
+from anova import figures
+from bubble_plot_app import bubble_plot
 
 
-def plot_fig():
-    df = px.data.gapminder()
-    fig = px.scatter(
-        df,
-        x="gdpPercap",
-        y="lifeExp",
-        animation_frame="year",
-        animation_group="country",
-        size="pop",
-        color="continent",
-        hover_name="country",
-        log_x=True,
-        size_max=55,
-        range_x=[100, 100000],
-        range_y=[25, 90],
-    )
-    return fig.to_html(full_html=False)
+async def ANOVA(request):
+    return {"lista": figures()}
 
 
-async def hello_controller(request):
-    return {"fig": plot_fig()}
+async def BUBBLE(request):
+    return {"fig": bubble_plot()}
 
 
 class DummyAgent(Agent):
@@ -46,15 +32,23 @@ class DummyAgent(Agent):
         b = self.MyBehav()
         self.add_behaviour(b)
         self.add_behaviour(b)
-        # self.web.add_menu_entry("My entry", "/home", "fa fa-user")
-        # self.web.add_get("/home", hello_controller, template="template.html")
 
 
 async def main():
     dummy = DummyAgent("dummy@localhost", "your_password")
     print("DummyAgent started. Check its console to see the output.")
-    dummy.web.add_menu_entry("My entry", "/home", "fa fa-user")
-    dummy.web.add_get("/home", hello_controller, template="template.html")
+    dummy.web.add_menu_entry("Anova", "/spade/anova", "fa fa-bolt")
+    dummy.web.add_menu_entry("Bubble", "/spade/bubble_plot", "fa fa-bomb")
+    dummy.web.add_get(
+        "/spade/anova",
+        ANOVA,
+        template="template2.html",
+    )
+    dummy.web.add_get(
+        "/spade/bubble_plot",
+        BUBBLE,
+        template="template.html",
+    )
     await dummy.start(auto_register=True)
     dummy.web.start(hostname="localhost", port="10000")
     print(dummy.web.menu_entries)

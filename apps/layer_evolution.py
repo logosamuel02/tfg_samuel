@@ -4,25 +4,11 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def bubble_plot():
+def layer_evolution_plot():
     FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
 
-    colors = [
-        "white",
-        "#aec4ff",
-        "#ff9090",
-        "#95ff90",
-        "#ffb74a",
-        "#e2b1ff",
-        "#fef575",
-        "#e2e2e2",
-        "#ffdcf7",
-        "#f5deb3",
-        "#99fff0",
-        "white",
-    ]
     data = read_csv(PATH.joinpath("raw/data_split.csv"))
     agents = data.agent.unique()
 
