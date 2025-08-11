@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 
 def bubble_plot():
-    FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
+    FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
 

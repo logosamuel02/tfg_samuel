@@ -11,7 +11,7 @@ from statsmodels.multivariate.manova import MANOVA
 
 
 def figures():
-    FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
+    FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
 
     template = "seaborn"
     experiment_variables = ["agent", "algorithm", "n_agents", "type", "network"]
@@ -157,16 +157,16 @@ def figures():
         rows=1,
         cols=2,
         subplot_titles=(
-            "Interaction plot: Type vs Loss",
-            "Interaction plot: Network vs Loss",
+            "Type vs Loss",
+            "Network vs Loss",
         ),
     )
     F2 = make_subplots(
         rows=1,
         cols=2,
         subplot_titles=(
-            "Box plot: Type vs Loss",
-            "Box plot: Network vs Loss",
+            "Type vs Loss",
+            "Network vs Loss",
         ),
     )
 

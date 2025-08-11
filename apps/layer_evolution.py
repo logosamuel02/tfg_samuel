@@ -1,119 +1,180 @@
 from pathlib import Path
-from pandas import read_csv
-import numpy as np
+import plotly.express as px
 import plotly.graph_objects as go
+import pandas as pd
+from itertools import groupby
 
 
 def layer_evolution_plot():
-    FOLDER = Path("/home/slozgom/tfg_samuel/xperiments/experimentos_con_cnn")
+    FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
 
-    data = read_csv(PATH.joinpath("raw/data_split.csv"))
-    agents = data.agent.unique()
+    df = pd.read_csv(
+        "/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn/05_non_complete/raw/nn_convergence.csv"
+    )
+    lst = df.layer.unique()
+    f = lambda x: x.split(".")[0]
+    layers_opts = {f(k): list(g) for k, g in groupby(sorted(lst, key=f), key=f)}
+    df = df[
+        (df.description == "PRE-TRAIN")
+        & df.layer.isin(layers_opts["conv1"])
+        & (df.epoch_or_iteration == 1)
+    ]
+    pivot = df.pivot(columns="layer", values="weight")
+    df = df[df.layer == layers_opts["conv1"][0]].reset_index()
+    df[layers_opts["conv1"][0]] = (
+        pivot[layers_opts["conv1"][0]]
+        .dropna()
+        .reset_index()[f"{layers_opts['conv1'][0]}"]
+    )
+    df[layers_opts["conv1"][1]] = (
+        pivot[layers_opts["conv1"][1]]
+        .dropna()
+        .reset_index()[f"{layers_opts['conv1'][1]}"]
+    )
+    min_x = df[layers_opts["conv1"][0]].min()
+    min_y = df[layers_opts["conv1"][1]].min()
+    max_x = df[layers_opts["conv1"][0]].max()
+    max_y = df[layers_opts["conv1"][1]].max()
+    fig = px.scatter(
+        df,
+        x=layers_opts["conv1"][0],
+        y=layers_opts["conv1"][1],
+        animation_frame="algorithm_round",
+        color="agent",
+        hover_name="agent",
+        range_x=[min_x, max_x],
+        range_y=[min_y, max_y],
+    )
 
-    fig = go.Figure()
+    """
+    Second Figure
+    """
 
-    phases = ["train", "validation", "test"]
-    visible = True
-    for phase in phases:
-        labels = data.label.unique()
-        X = np.zeros((len(labels) + 2, len(agents) + 2))
-        for i, agent in enumerate(agents):
-            split_data = data[(data.agent == agent) & (data.description == phase)]
-            for x, (_, row) in enumerate(split_data.iterrows()):
-                X[row.label + 1, i + 1] = row["count"]
+    df = pd.read_csv(
+        "/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn/05_non_complete/raw/nn_convergence.csv"
+    )
+    lst = df.layer.unique()
+    f = lambda x: x.split(".")[0]
+    layers_opts = {f(k): list(g) for k, g in groupby(sorted(lst, key=f), key=f)}
+    df = df[
+        (df.description == "PRE-TRAIN")
+        & df.layer.isin(layers_opts["conv1"])
+        & (df.epoch_or_iteration == 1)
+    ]
+    pivot = df.pivot(columns="layer", values="weight")
+    df = df[df.layer == layers_opts["conv1"][0]].reset_index()
+    df[layers_opts["conv1"][0]] = (
+        pivot[layers_opts["conv1"][0]]
+        .dropna()
+        .reset_index()[f"{layers_opts['conv1'][0]}"]
+    )
+    df[layers_opts["conv1"][1]] = (
+        pivot[layers_opts["conv1"][1]]
+        .dropna()
+        .reset_index()[f"{layers_opts['conv1'][1]}"]
+    )
+    min_x = df[layers_opts["conv1"][0]].min()
+    min_y = df[layers_opts["conv1"][1]].min()
+    max_x = df[layers_opts["conv1"][0]].max()
+    max_y = df[layers_opts["conv1"][1]].max()
+    line_plot = px.line(
+        df,
+        x="algorithm_round",
+        y=layers_opts["conv1"][0],
+        color="agent",
+        animation_frame="algorithm_round",
+        hover_name="agent",
+        range_x=[0, 110],
+        range_y=[min_x, max_x],
+    )
+    line_plot.update_traces(showlegend=False)  # legend will be from line graph
+    for frame in line_plot.frames:
+        for data in frame.data:
+            data.update(mode="lines", opacity=0.8, showlegend=False)
 
-        scale = 10
-        M, N = X.shape
-        X_sizes = X.copy()
-        for i in range(M):
-            xmin, xmax = X_sizes[i, :].min(), X_sizes[i, :].max()
-            tmin, tmax = 20, 55
-            X_sizes[i, :] = (X_sizes[i, :] - xmin) / (xmax - xmin) * (
-                tmax - tmin
-            ) + tmin
-        x = []
-        y = []
-        colores = []
-        sizes = []
-        texts = []
-        for j in range(N):
-            for i in range(M):
-                color = colors[i]
-                if X[i, j] != 0:
-                    x.append(j)
-                    y.append(i)
-                    colores.append(color)
-                    sizes.append(X_sizes[i, j])
-                    texts.append(f"{int(X[i,j])}")
-        fig.add_trace(
-            go.Scatter(
-                mode="markers+text",
-                x=x,
-                y=y,
-                marker=dict(color=colores, size=sizes, opacity=1),
-                text=texts,
-                line=dict(color="black", width=1),
-                visible=visible,
-                hovertemplate="<br><b>Agent</b>: %{x}<br>"
-                + "<br><b>Digit</b>: %{y}<br>"
-                + "<br><b>Samples</b>: %{text}<br>",
-            )
-        )
-        visible = False
-
-    # Create the dropdown menu
-    buttons = []
-
-    # Add a button for each agent to the dropdown
-    for i, phase in enumerate(phases):
-        visibility = [False] * len(phases)
-        visibility[i] = True
-        buttons.append(
-            dict(
-                label=phase,
-                method="update",
-                args=[
-                    {"visible": visibility},
-                    {"title": {"text": f"Categorical bubble plot for {phase}"}},
-                ],
-            )
-        )
-
-    # Update the figure layout with the dropdown menu
-    fig.update_layout(
-        updatemenus=[
-            dict(
-                active=0, buttons=buttons, x=0.01, xanchor="left", y=1.06, yanchor="top"
-            )
+    df = df.sort_values(
+        [
+            "algorithm_round",
+            "agent",
         ],
-        title_text="Categorical bubble plot for train",
-        xaxis_title="Agents",
-        yaxis_title="Labels",
+        ignore_index=True,
+    )
+    N_UNIQUE_AGENTS = df["agent"].nunique()
+    df_indexed = pd.DataFrame()
+    for index in np.arange(start=0, stop=len(df) + 1, step=N_UNIQUE_AGENTS):
+        df_slicing = df.iloc[:index].copy()
+        df_slicing["frame"] = index // N_UNIQUE_AGENTS
+        df_indexed = pd.concat([df_indexed, df_slicing])
+
+    # Scatter Plot
+    scatter_plot = px.scatter(
+        df_indexed,
+        x="algorithm_round",
+        y=layers_opts["conv1"][0],
+        animation_frame="frame",
+        color="agent",
+        hover_name="agent",
+        range_x=[0, 110],
+        range_y=[min_x, max_x],
     )
 
-    fig.update_layout(xaxis_range=[0, len(agents) + 1])
-    fig.update_layout(yaxis_range=[0, len(colors) - 1])
-    fig.update_layout(width=143 * (len(agents) + 2))
-    fig.update_layout(height=67 * len(colors))
-    fig.update_layout(plot_bgcolor="rgb(256,256,256)")
-    fig.update_xaxes(
-        ticktext=agents,
-        tickvals=list(range(1, len(agents) + 1)),
-        showgrid=True,
-        gridwidth=1,
-        gridcolor="grey",
+    for frame in scatter_plot.frames:
+        for data in frame.data:
+            data.update(mode="markers", showlegend=True, opacity=1)
+            data["x"] = np.take(data["x"], [-1])
+            data["y"] = np.take(data["y"], [-1])
+
+    # Line Plot
+    line_plot = px.line(
+        df_indexed,
+        x="algorithm_round",
+        y=layers_opts["conv1"][0],
+        color="agent",
+        animation_frame="frame",
+        range_x=[0, 110],
+        range_y=[min_x, max_x],
+        line_shape="spline",  # make a line graph curvy
     )
-    fig.update_yaxes(
-        ticktext=sorted(labels),
-        tickvals=list(range(1, len(labels) + 1)),
-        showgrid=True,
-        gridwidth=1,
-        gridcolor="grey",
+    line_plot.update_traces(showlegend=False)  # legend will be from line graph
+    for frame in line_plot.frames:
+        for data in frame.data:
+            data.update(mode="lines", opacity=0.8, showlegend=False)
+
+    line_plot.update_traces(showlegend=False)  # legend will be from line graph
+    for frame in line_plot.frames:
+        for data in frame.data:
+            data.update(mode="lines", opacity=0.8, showlegend=False)
+
+    # Stationary combined plot
+    combined_plot = go.Figure(
+        data=line_plot.data + scatter_plot.data,
+        frames=[
+            go.Frame(data=line_plot.data + scatter_plot.data, name=scatter_plot.name)
+            for line_plot, scatter_plot in zip(line_plot.frames, scatter_plot.frames)
+        ],
+        layout=line_plot.layout,
     )
 
-    return fig.to_html(full_html=False)
+    combined_plot.update_yaxes(
+        gridcolor="#7a98cf", griddash="dot", gridwidth=0.5, linewidth=2, tickwidth=2
+    )
+
+    combined_plot.update_xaxes(title_font=dict(size=16), linewidth=2, tickwidth=2)
+
+    combined_plot.update_traces(line=dict(width=5), marker=dict(size=25))
+
+    # adjust speed of animation
+    combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["frame"]["duration"] = 120
+    combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
+        "duration"
+    ] = 50
+    combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
+        "redraw"
+    ] = False
+
+    return [F.to_html(full_html=False) for F in [fig, combined_plot]]
 
 
 # fig.write_html("index.html")
