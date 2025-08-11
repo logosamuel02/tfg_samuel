@@ -38,7 +38,6 @@ def network_plot():
         "/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn/05_non_complete/raw/nn_inference.csv"
     )
     nodes = nodes[["agent", "timestamp", "test_accuracy"]]
-    nodes
 
     nodes.timestamp = pd.to_datetime(nodes.timestamp)
     nodes.timestamp = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
