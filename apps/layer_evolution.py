@@ -1,11 +1,13 @@
+import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from itertools import groupby
+import numpy as np
 
 
-def layer_evolution_plot():
+def layer_evolution_plot(download=False):
     FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
@@ -47,6 +49,7 @@ def layer_evolution_plot():
         range_x=[min_x, max_x],
         range_y=[min_y, max_y],
     )
+    fig.update_layout(title_text="First plot")
 
     """
     Second Figure
@@ -173,8 +176,18 @@ def layer_evolution_plot():
     combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
         "redraw"
     ] = False
+    combined_plot.update_layout(title_text="Combined plot")
 
-    return [F.to_html(full_html=False) for F in [fig, combined_plot]]
+    if download:
+        root = "images"
+        folder = f"{root}/{__name__.split(".")[0]}"
+        isExist = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for i,F in enumerate([fig, combined_plot]):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(" ", "_")}.svg")
+    else:
+        return [F.to_html(full_html=False) for F in [fig, combined_plot]]
 
 
 # fig.write_html("index.html")

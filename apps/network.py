@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import plotly.express as px
 import numpy as np
@@ -6,7 +7,7 @@ import pandas as pd
 import networkx as nx
 
 
-def network_plot():
+def network_plot(download=False):
     FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
@@ -115,7 +116,16 @@ def network_plot():
         title_text="Test accuracy evolution inside agents network"
     )
 
-    return scatter_plot.to_html(full_html=False)
+    if download:
+        root = "images"
+        folder = f"{root}/{__name__.split(".")[0]}"
+        isExist = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for i,F in enumerate([scatter_plot]):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(" ", "_")}.svg")
+    else:
+        return scatter_plot.to_html(full_html=False)
 
 
 # fig.write_html("index.html")

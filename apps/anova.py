@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import scikit_posthocs as sp
@@ -10,7 +11,7 @@ import plotly.figure_factory as ff
 from statsmodels.multivariate.manova import MANOVA
 
 
-def figures():
+def figures(download=False):
     FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
 
     template = "seaborn"
@@ -257,16 +258,26 @@ def figures():
         "ANOVA table",
         "Post-hoc Tuckey Test",
         "Post-hoc Nemenyi Test",
-        "MANOVA table: Intercept and Network",
+        "MANOVA table Intercept",
+        "MANOVA table Network"
     ]
 
-    for F, title in zip([F0, F1, F2, F3, F4, F5, F6], titles):
+    for F, title in zip([F0, F1, F2, F3, F4, F5, F6, F7], titles):
         F.update_layout(title_text=title)
         F.update_layout({"margin": {"t": 50}})
 
     print("######## before return")
 
-    return [F.to_html(full_html=False) for F in [F0, F1, F2, F3, F4, F5, F6, F7]]
+    if download:
+        root = "images"
+        folder = f"{root}/{__name__.split(".")[0]}"
+        isExist = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for i,F in enumerate([F0, F1, F2, F3, F4, F5, F6, F7]):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(" ", "_")}.svg")
+    else:
+        return [F.to_html(full_html=False) for F in [F0, F1, F2, F3, F4, F5, F6, F7]]
 
 
 # fig.write_html("index.html")

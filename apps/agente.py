@@ -1,5 +1,5 @@
 import asyncio
-
+import os
 
 import spade
 from spade import wait_until_finished
@@ -11,26 +11,30 @@ from bubble_plot_app import bubble_plot
 from layer_evolution import layer_evolution_plot
 from violin_plot import violin_plot
 from network import network_plot
+from all_download import download
 
 
 async def ANOVA(request):
-    return {"lista": figures()}
+    return {"lista": figures(download=False)}
 
 
 async def BUBBLE(request):
-    return {"fig": bubble_plot()}
+    return {"fig": bubble_plot(download=False)}
 
 
 async def LAYERS(request):
-    return {"lista": layer_evolution_plot()}
+    return {"lista": layer_evolution_plot(download=False)}
 
 
 async def VIOLIN(request):
-    return {"fig": violin_plot()}
+    return {"fig": violin_plot(download=False)}
 
 
 async def NETWORK(request):
-    return {"fig": network_plot()}
+    return {"fig": network_plot(download=False)}
+
+async def DOWNLOAD(request):
+    return {"fig": download()}
 
 
 class DummyAgent(Agent):
@@ -50,6 +54,10 @@ class DummyAgent(Agent):
 
 
 async def main():
+    folder = "images"
+    isExist = os.path.exists("images")
+    if not isExist:
+        os.makedirs(folder)
     dummy = DummyAgent("dummy@localhost", "your_password")
     print("DummyAgent started. Check its console to see the output.")
     dummy.web.add_menu_entry("Anova", "/spade/anova", "fa fa-bolt")
@@ -57,6 +65,7 @@ async def main():
     dummy.web.add_menu_entry("Layers", "/spade/layer_plot", "fa fa-bomb")
     dummy.web.add_menu_entry("Violin", "/spade/violin_plot", "fa fa-bomb")
     dummy.web.add_menu_entry("Network", "/spade/network_plot", "fa fa-bomb")
+    dummy.web.add_menu_entry("Download", "/spade/download", "fa fa-bomb")
     dummy.web.add_get(
         "/spade/anova",
         ANOVA,
@@ -80,6 +89,11 @@ async def main():
     dummy.web.add_get(
         "/spade/network_plot",
         NETWORK,
+        template="template.html",
+    )
+    dummy.web.add_get(
+        "/spade/download",
+        DOWNLOAD,
         template="template.html",
     )
     await dummy.start(auto_register=True)

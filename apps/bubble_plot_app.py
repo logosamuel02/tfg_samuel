@@ -1,10 +1,11 @@
+import os
 from pathlib import Path
 from pandas import read_csv
 import numpy as np
 import plotly.graph_objects as go
 
 
-def bubble_plot():
+def bubble_plot(download=False):
     FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
     experiments_list = list(FOLDER.iterdir())
     PATH = experiments_list[8]
@@ -127,7 +128,16 @@ def bubble_plot():
         gridcolor="grey",
     )
 
-    return fig.to_html(full_html=False)
+    if download:
+        root = "images"
+        folder = f"{root}/{__name__.split(".")[0]}"
+        isExist = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for i,F in enumerate([fig]):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(" ", "_")}.svg")
+    else:
+        return fig.to_html(full_html=False)
 
 
 # fig.write_html("index.html")
