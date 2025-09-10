@@ -5,16 +5,14 @@ import pandas as pd
 from itertools import groupby
 import numpy as np
 
+
 def create_df(config):
     df = pd.read_csv(config.experiment_path / r"nn_convergence.csv")
     lst = df.layer.unique()
     f = lambda x: x.split(".")[0]
     global layers_opts
     layers_opts = {f(k): list(g) for k, g in groupby(sorted(lst, key=f), key=f)}
-    df = df[
-        (df.description == "PRE-TRAIN")
-        & (df.epoch_or_iteration == 1)
-    ]
+    df = df[(df.description == "PRE-TRAIN") & (df.epoch_or_iteration == 1)]
     pivot = df.pivot(columns="layer", values="weight")
     df = df[df.layer == layers_opts["conv1"][0]].reset_index()
 
@@ -43,8 +41,9 @@ def create_df(config):
         df_slicing = df.iloc[:index].copy()
         df_slicing["frame"] = index // N_UNIQUE_AGENTS
         df_indexed = pd.concat([df_indexed, df_slicing])
-        
+
     return df_indexed
+
 
 def create_xy_scatter_plot(data, layer):
     fig = px.scatter(
@@ -60,6 +59,7 @@ def create_xy_scatter_plot(data, layer):
     fig.update_layout(title_text=f"{layer.upper()} layer evolution of agents")
     return fig
 
+
 def create_scatter_plot(data, sublayer):
     scatter_plot = px.scatter(
         data,
@@ -68,7 +68,7 @@ def create_scatter_plot(data, sublayer):
         animation_frame="frame",
         color="agent",
         hover_name="agent",
-        range_x=[0, len(data.algorithm_round.unique())+1],
+        range_x=[0, len(data.algorithm_round.unique()) + 1],
         range_y=[min_x, max_x],
     )
 
@@ -79,6 +79,7 @@ def create_scatter_plot(data, sublayer):
             data["y"] = np.take(data["y"], [-1])
     return scatter_plot
 
+
 def create_line_plot(data, sublayer):
     line_plot = px.line(
         data,
@@ -86,7 +87,7 @@ def create_line_plot(data, sublayer):
         y=sublayer,
         color="agent",
         animation_frame="frame",
-        range_x=[0, len(data.algorithm_round.unique())+1],
+        range_x=[0, len(data.algorithm_round.unique()) + 1],
         range_y=[min_x, max_x],
         line_shape="spline",  # make a line graph curvy
     )
@@ -94,9 +95,10 @@ def create_line_plot(data, sublayer):
     for frame in line_plot.frames:
         for data in frame.data:
             data.update(mode="lines", opacity=0.8, showlegend=False)
-            
+
     return line_plot
-    
+
+
 def create_combined_plot(scatter_plot, line_plot, sublayer):
     combined_plot = go.Figure(
         data=line_plot.data + scatter_plot.data,
@@ -123,8 +125,11 @@ def create_combined_plot(scatter_plot, line_plot, sublayer):
     combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
         "redraw"
     ] = False
-    combined_plot.update_layout(title_text=f"{sublayer.upper()} layer evolution of agents")
+    combined_plot.update_layout(
+        title_text=f"{sublayer.upper()} layer evolution of agents"
+    )
     return combined_plot
+
 
 def set_globals_layer(data, layer):
     global min_x
@@ -135,13 +140,14 @@ def set_globals_layer(data, layer):
     max_x = data[layers_opts[layer][0]].max()
     global max_y
     max_y = data[layers_opts[layer][1]].max()
-    
+
+
 def set_globals_sublayer(data, layer, index):
     global min_x
     min_x = data[layers_opts[layer][index]].min()
     global max_x
     max_x = data[layers_opts[layer][index]].max()
-    
+
 
 def generate(config, download=False):
     data = create_df(config)
@@ -154,7 +160,9 @@ def generate(config, download=False):
             set_globals_sublayer(data, layer, i)
             scatter_plot = create_scatter_plot(data, layers_opts[layer][i])
             line_plot = create_line_plot(data, layers_opts[layer][i])
-            combined_plot = create_combined_plot(scatter_plot, line_plot, layers_opts[layer][i])
+            combined_plot = create_combined_plot(
+                scatter_plot, line_plot, layers_opts[layer][i]
+            )
             figs.append(combined_plot)
         print(f"Created plots for {layer.upper()} layer")
     if download:
@@ -163,7 +171,7 @@ def generate(config, download=False):
         isExist = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for i,F in enumerate(figs):
+        for i, F in enumerate(figs):
             F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
     else:
         updated_figs = []

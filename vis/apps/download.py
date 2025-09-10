@@ -2,9 +2,9 @@ import anova
 import algorithm
 import data_split
 import messages
+import convergence
 import inference
 import network
-
 
 
 html = """
@@ -27,10 +27,13 @@ html = """
 <span style='color:#FE1304;'>!</span></span>
 """
 
+
 def download(config):
+    anova.generate(config=config, download=True)
     algorithm.generate(config=config, download=True)
     data_split.generate(config=config, download=True)
     messages.generate(config=config, download=True)
+    convergence.generate(config=config, download=True)
     inference.generate(config=config, download=True)
-    #network.generate(config=config, download=True)
+    network.generate(config=config, download=True)
     return html

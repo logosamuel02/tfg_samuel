@@ -21,26 +21,34 @@ from config import Config
 load_dotenv()
 config = Config()
 
+
 async def ANOVA(request):
     return {"lista": anova.generate(config=config, download=False)}
+
 
 async def ALGORITHM(request):
     return {"lista": algorithm.generate(config=config, download=False)}
 
+
 async def DATA_SPLIT(request):
     return {"lista": data_split.generate(config=config, download=False)}
+
 
 async def MESSAGES(request):
     return {"lista": messages.generate(config=config, download=False)}
 
+
 async def CONVERGENCE(request):
     return {"lista": convergence.generate(config=config, download=False)}
+
 
 async def INFERENCE(request):
     return {"lista": inference.generate(config=config, download=False)}
 
+
 async def NETWORK(request):
     return {"lista": network.generate(config=config, download=False)}
+
 
 async def DOWNLOAD(request):
     return {"lista": download.download(config=config)}
@@ -69,7 +77,7 @@ async def main():
         os.makedirs(folder)
     dummy = DummyAgent("dummy@localhost", "your_password")
     print("DummyAgent started. Check its console to see the output.")
-    
+
     dummy.web.add_menu_entry("Anova", "/spade/anova", "fa fa-bolt")
     dummy.web.add_menu_entry("Algorithm", "/spade/algorithm", "fa fa-bomb")
     dummy.web.add_menu_entry("Data Split", "/spade/data_split", "fa fa-bomb")
@@ -78,7 +86,7 @@ async def main():
     dummy.web.add_menu_entry("Inference", "/spade/inference", "fa fa-bomb")
     dummy.web.add_menu_entry("Network", "/spade/network", "fa fa-bomb")
     dummy.web.add_menu_entry("Download", "/spade/download", "fa fa-bomb")
-    
+
     dummy.web.add_get(
         "/spade/anova",
         ANOVA,

@@ -14,6 +14,7 @@ func_dict = {
     "multiply": multiply,
 }
 
+
 def render(template):
     env = Environment(loader=FileSystemLoader(""))
     jinja_template = env.get_template(template)

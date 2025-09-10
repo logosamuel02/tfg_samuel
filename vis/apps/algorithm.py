@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from more_itertools import sort_together
 
+
 def violin_plot(data):
     agents = list(map(lambda x: x.split("@")[0], sorted(data.agent.unique())))
     times = []
@@ -30,14 +31,15 @@ def violin_plot(data):
     fig.update_layout(title_text="Seconds to complete training round by agent")
     return fig
 
+
 def execution_time_plot(data):
     data = data[data.algorithm_round <= 100]
     data.timestamp = pd.to_datetime(data.timestamp)
     agents = data.agent.unique()
     times = []
     elapsed = []
-    for i,agent in enumerate(agents):
-        dates = list(data.timestamp[data.agent==agent])
+    for i, agent in enumerate(agents):
+        dates = list(data.timestamp[data.agent == agent])
         rang = dates[-1] - dates[0]
         times.append(rang.total_seconds())
         elapsed.append(dates[-1])
@@ -45,18 +47,30 @@ def execution_time_plot(data):
     m = min(elapsed)
     for i, agent in enumerate(agents):
         elapsed[i] = (elapsed[i] - m).total_seconds()
-        
-    elapsed, agents, times  = sort_together((elapsed, agents, times))
 
-    df = pd.DataFrame({"seconds":times, "agents": list(map(lambda x: x.split("@")[0], agents)), "seconds elapsed": elapsed})
-    fig = px.bar(df, x='seconds elapsed', y='agents',
-                hover_data=['seconds', 'seconds elapsed'], 
-                color='agents',
-                labels={'pop':'seconds'},
-                text="seconds",
-                title="Tiempos de ejecución ordenados por agente",
-                orientation='h')
-    fig.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
+    elapsed, agents, times = sort_together((elapsed, agents, times))
+
+    df = pd.DataFrame(
+        {
+            "seconds": times,
+            "agents": list(map(lambda x: x.split("@")[0], agents)),
+            "seconds elapsed": elapsed,
+        }
+    )
+    fig = px.bar(
+        df,
+        x="seconds elapsed",
+        y="agents",
+        hover_data=["seconds", "seconds elapsed"],
+        color="agents",
+        labels={"pop": "seconds"},
+        text="seconds",
+        title="Tiempos de ejecución ordenados por agente",
+        orientation="h",
+    )
+    fig.update_traces(
+        textfont_size=12, textangle=0, textposition="outside", cliponaxis=False
+    )
     return fig
 
 
@@ -71,7 +85,7 @@ def generate(config, download=False):
         isExist = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for i,F in enumerate(figs):
+        for i, F in enumerate(figs):
             F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
     else:
         updated_figs = []
@@ -81,4 +95,3 @@ def generate(config, download=False):
             html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)
         return updated_figs
-
