@@ -1,18 +1,221 @@
 import os
+import re
 import pandas as pd
 import numpy as np
 import scikit_posthocs as sp
 from pathlib import Path
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
 import plotly.express as px
 import pingouin as pg
 import plotly.figure_factory as ff
 from statsmodels.multivariate.manova import MANOVA
 
+experiment_variables = [
+    "uuid4",
+    "algorithm",
+    "algorithm_rounds",
+    "consensus_iterations",
+    "training_epochs",
+    "xmpp_domain",
+    "graph_path",
+    "dataset",
+    "distribution",
+    "ann",
+    "seed",
+]
+
+variables = ["agent", "experiment"]
+
+agent_variables = [
+    "minimum_loss_achieved",
+    "maximum_accuracy_achieved",
+    "maximum_recall_achieved",
+    "maximum_precision_achieved",
+    "maximum_f1_achieved",
+    "mean_seconds_by_round",
+]
+
+
+def create_df(config):
+    df = pd.DataFrame(columns=experiment_variables + variables + agent_variables)
+    for root, dirs, files in os.walk(config.source_path):
+        if root.endswith("raw"):
+            root = Path(root)
+            dataset = pd.read_csv(root.joinpath(r"nn_inference.csv"))
+            descriptive = root.parent.name
+
+            with open(root.joinpath(r"general.log"), encoding="utf-8") as file:
+                my_data = file.read()
+            line = re.findall(r"Experiment details: <Experiment (.+)>\n", my_data)[0]
+            splits = line.split(",")
+            splits = dict(map(lambda i: i.strip().split("="), splits))
+            experiment_vals = list(splits.values())
+
+            times = pd.read_csv(root.joinpath(r"algorithm.csv"))
+            agents = dataset.agent.unique()
+            for ag in agents:
+                agent_times = times[(times.agent == ag + "@localhost")]
+                time = agent_times.seconds_to_complete.mean()
+
+                data = dataset[(dataset.agent == ag)]
+                numeric = list(
+                    map(
+                        max,
+                        [
+                            data.test_accuracy,
+                            data.test_recall,
+                            data.test_precision,
+                            data.test_f1_score,
+                        ],
+                    )
+                )
+                numerics = [data.test_loss.min()] + numeric + [time]
+                row = experiment_vals + [ag] + [descriptive] + numerics
+                df.loc[len(df)] = row
+
+
+def create_atable(df):
+    atable = pg.anova(
+        data=df,
+        dv="maximum_accuracy_achieved",
+        between=["distribution", "ann"],
+        detailed=True,
+    ).round(4)
+    return atable
+
+
+def create_atable_fig(atable):
+    fig = ff.create_table(atable)
+    fig.update_layout(
+        title_text="Table of Minimum Loss achieved grouped by Type and Network"
+    )
+    return fig
+
+
+def create_interaction_plot(atable, var1, var2):
+    fig = px.scatter(
+        atable,
+        x=var1,
+        y="max_acc",
+        color=var2,
+        title="Interaction plot: Network and Type",
+        template="seaborn",
+        labels={
+            "x": "Type",
+            "response": "Avg Minimum loss achieved",
+            "trace": "Network",
+        },
+    ).update_traces(mode="lines+markers")
+    fig.update_layout(title_text="Interaction plot: Network and Type")
+    return fig
+
+
+def create_box_plot(df, var):
+    fig = px.box(
+        df,
+        x=var,
+        y="maximum_accuracy_achieved",
+        color=var,
+        points="all",
+        template="seaborn",
+    )
+    fig.update_layout(title_text="Distribution distribution")
+    return fig
+
+
+def create_anova(df):
+    atable = pg.anova(
+        data=df,
+        dv="maximum_accuracy_achieved",
+        between=["distribution", "ann"],
+        detailed=True,
+    ).round(4)
+    fig = ff.create_table(atable)
+    fig.update_layout(title_text="ANOVA table")
+    return fig
+
+
+def create_tuckey_test(df):
+    pg_test = pg.pairwise_tukey(
+        data=df, dv="maximum_accuracy_achieved", between="distribution"
+    ).round(3)
+    fig = ff.create_table(pg_test)
+    fig.update_layout(title_text="Post-hoc Tuckey Test")
+    return fig
+
+
+def create_nemenyi_test(df):
+    options = df.distribution.unique()
+    array = []
+    for opt in options:
+        opt_values = df.maximum_accuracy_achieved[(df.distribution == opt)]
+        array.append(opt_values)
+    data_nem = np.array(array)
+    nemtable = sp.posthoc_nemenyi_friedman(data_nem.T).to_numpy()
+    fig = px.imshow(
+        nemtable, x=options, y=options, color_continuous_scale="Viridis", aspect="auto"
+    )
+    fig.update_traces(text=nemtable, texttemplate="%{text}")
+    fig.update_xaxes(side="top")
+    fig.update_layout(title_text="Post-hoc Nemenyi Test")
+    return fig
+
+
+def create_manova(df):
+    manova = MANOVA.from_formula(
+        "minimum_loss_achieved + maximum_accuracy_achieved + maximum_recall_achieved + maximum_precision_achieved + maximum_f1_achieved ~ distribution",
+        data=df,
+    )
+    result = manova.mv_test()
+    return result
+
+
+def create_manova_figs(result):
+    intercept = result.results["Intercept"]["stat"]
+    intercept.reset_index(inplace=True)
+    intercept = intercept.rename(columns={"index": "tests"})
+    fig = ff.create_table(intercept)
+    fig.update_layout(title_text="MANOVA table Intercept")
+
+    distribution = result.results["distribution"]["stat"]
+    distribution.reset_index(inplace=True)
+    distribution = distribution.rename(columns={"index": "tests"})
+    fig2 = ff.create_table(distribution)
+    fig2.update_layout(title_text="MANOVA table Distribution")
+
+    return [fig, fig2]
+
+
+def generate(config, download=False):
+    data = create_df(config)
+    atable = create_atable(data)
+    f = create_atable_fig(atable)
+    f2 = [
+        create_interaction_plot(atable, "distribution", "ann"),
+        create_interaction_plot(atable, "ann", "distribution"),
+    ]
+    f3 = create_box_plot(atable)
+    f4 = create_anova(data)
+    f5 = create_tuckey_test(data)
+    f6 = create_nemenyi_test(data)
+    manova = create_manova(data)
+    f7 = create_manova_figs(manova)
+
+    if download:
+        root = "images"
+        folder = f"{root}/{__name__.split('.')[0]}"
+        isExist = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for i, F in enumerate(figs):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
+    else:
+        return [F.to_html(full_html=False) for F in figs]
+
 
 def figures(download=False):
-    FOLDER = Path("/home/slozgom/tfg/tfg_samuel/xperiments/experimentos_con_cnn")
+    FOLDER = Path(
+        r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn"
+    )
 
     template = "seaborn"
     experiment_variables = ["agent", "algorithm", "n_agents", "type", "network"]
@@ -67,11 +270,11 @@ def figures(download=False):
     # Modificar esta lista
     experiments_list = [x for x in list(FOLDER.iterdir()) if "10" in x.name]
     for PATH in experiments_list:
-        dataset = pd.read_csv(PATH.joinpath("raw/nn_inference.csv"))
+        dataset = pd.read_csv(PATH.joinpath(r"raw/nn_inference.csv"))
         agents = dataset.agent.unique()
         dataset = dataset[(dataset.algorithm_round <= 100)]
         descriptive = PATH.name.split("_")
-        times = pd.read_csv(PATH.joinpath("raw/algorithm.csv"))
+        times = pd.read_csv(PATH.joinpath(r"raw/algorithm.csv"))
         times = times[(times.algorithm_round <= 100)]
         for ag in agents:
             agent_times = times[(times.agent == ag + "@localhost")]
@@ -259,7 +462,7 @@ def figures(download=False):
         "Post-hoc Tuckey Test",
         "Post-hoc Nemenyi Test",
         "MANOVA table Intercept",
-        "MANOVA table Network"
+        "MANOVA table Network",
     ]
 
     for F, title in zip([F0, F1, F2, F3, F4, F5, F6, F7], titles):
@@ -270,12 +473,12 @@ def figures(download=False):
 
     if download:
         root = "images"
-        folder = f"{root}/{__name__.split(".")[0]}"
+        folder = f"{root}/{__name__.split('.')[0]}"
         isExist = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for i,F in enumerate([F0, F1, F2, F3, F4, F5, F6, F7]):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(" ", "_")}.svg")
+        for i, F in enumerate([F0, F1, F2, F3, F4, F5, F6, F7]):
+            F.write_image(f"{folder}/{F.layout.title.text.replace(' ','_')}.svg")
     else:
         return [F.to_html(full_html=False) for F in [F0, F1, F2, F3, F4, F5, F6, F7]]
 

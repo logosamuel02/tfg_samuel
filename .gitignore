@@ -5,3 +5,9 @@ logs/
 *venv/
 xperiments/
 images/
+notebooks/
+nacio/
+dbs/
+.vscode/
+__pycache__/
+past/

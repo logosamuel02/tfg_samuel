@@ -1,8 +1,11 @@
-from anova import figures
-from bubble_plot_app import bubble_plot
-from layer_evolution import layer_evolution_plot
-from violin_plot import violin_plot
-from network import network_plot
+import anova
+import algorithm
+import data_split
+import messages
+import inference
+import network
+
+
 
 html = """
 <span style='font-family:"Arial Black";font-size:35px;'>
@@ -24,10 +27,10 @@ html = """
 <span style='color:#FE1304;'>!</span></span>
 """
 
-def download():
-    figures(download=True)
-    bubble_plot(download=True)
-    violin_plot(download=True)
-    network_plot(download=True)
-    layer_evolution_plot(download=True)
+def download(config):
+    algorithm.generate(config=config, download=True)
+    data_split.generate(config=config, download=True)
+    messages.generate(config=config, download=True)
+    inference.generate(config=config, download=True)
+    #network.generate(config=config, download=True)
     return html
