@@ -1,9 +1,16 @@
 import os
+import json
 from pydantic import BaseModel, DirectoryPath
 from dotenv import load_dotenv
 from pathlib import Path
 
 load_dotenv()
+
+
+def clean(var: str) -> str:
+    var = " ".join(var.split("_"))
+    var = var.replace(".", " ")
+    return var.capitalize()
 
 
 class Config(BaseModel):
@@ -13,21 +20,14 @@ class Config(BaseModel):
     experiment_path: None = None
     fig_config: None = None
     fig_buttons: None = None
+    plots: None = None
+    variables: None = None
 
     def model_post_init(self, __context):
         self.source_path = Path(rf"{self.source_path}")
         self.experiment_path = (
             self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
         )
-        self.fig_config = {
-            "toImageButtonOptions": {
-                "format": "svg",  # one of png, svg, jpeg, webp
-                "filename": "custom_image",
-                # 'height': 500,
-                # 'width': 700,
-                "scale": 1,  # Multiply title/legend/axis/canvas sizes by this factor
-            }
-        }
         self.fig_buttons = dict(
             dragmode="drawopenpath",
             newshape_line_color="cyan",
@@ -40,6 +40,11 @@ class Config(BaseModel):
                 "eraseshape",
             ],
         )
+        with open(r"plots_config.json") as file:
+            self.plots = json.load(file)
+
+        with open(r"variables.json") as file:
+            self.variables = json.load(file)
 
 
 config = Config()

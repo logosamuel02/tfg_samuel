@@ -3,20 +3,29 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
+from config import Config, clean
+
+config = Config()
+
 
 def train_by_agent(train):
     metrics = ["accuracy", "loss", "precision", "recall", "f1_score"]
     figs = []
     for metric in metrics:
-        figs.append(
-            px.line(
-                train,
-                x="algorithm_round",
-                y=metric,
-                color="agent",
-                title=f"Train {metric} evolution across rounds by agent",
-            )
+        fig = px.line(
+            train,
+            x="algorithm_round",
+            y=metric,
+            color="agent",
+            title=f"{config.variables[metric]['legend']} evolution across rounds by agent",
         )
+        fig.update_layout(config.plots["inference"]["train"]["layout"])
+        fig.update_layout(
+            xaxis_title_text=config.variables["algorithm_round"]["legend"],
+            yaxis_title_text=config.variables[metric]["legend"],
+            legend_title_text=config.variables["agent"]["legend"],
+        )
+        figs.append(fig)
     return figs
 
 
@@ -30,15 +39,20 @@ def test_by_agent(test):
     ]
     figs = []
     for metric in metrics:
-        figs.append(
-            px.line(
-                test,
-                x="algorithm_round",
-                y=metric,
-                color="agent",
-                title=f"{metric} evolution across rounds by agent",
-            )
+        fig = px.line(
+            test,
+            x="algorithm_round",
+            y=metric,
+            color="agent",
+            title=f"{config.variables[metric]['legend']} evolution across rounds by agent",
         )
+        fig.update_layout(config.plots["inference"]["test"]["layout"])
+        fig.update_layout(
+            xaxis_title_text=config.variables["algorithm_round"]["legend"],
+            yaxis_title_text=config.variables[metric]["legend"],
+            legend_title_text=config.variables["agent"]["legend"],
+        )
+        figs.append(fig)
     return figs
 
 
@@ -84,8 +98,12 @@ def train_test_network(train, test):
                 x=x + x_rev,
                 y=nmax + nmin,
                 fill="toself",
-                fillcolor="rgba(0,176,246,0.2)",
-                line_color="rgba(255,255,255,0)",
+                fillcolor=config.plots["inference"]["train_test"]["traces"][
+                    "train_fillcolor"
+                ],
+                line_color=config.plots["inference"]["train_test"]["traces"][
+                    "train_linecolor"
+                ],
                 name="Train",
                 showlegend=False,
             )
@@ -95,8 +113,12 @@ def train_test_network(train, test):
                 x=x + x_rev,
                 y=tmax + tmin,
                 fill="toself",
-                fillcolor="rgba(231,107,243,0.2)",
-                line_color="rgba(255,255,255,0)",
+                fillcolor=config.plots["inference"]["train_test"]["traces"][
+                    "test_fillcolor"
+                ],
+                line_color=config.plots["inference"]["train_test"]["traces"][
+                    "test_linecolor"
+                ],
                 showlegend=False,
                 name="Test",
             )
@@ -105,7 +127,9 @@ def train_test_network(train, test):
             go.Scatter(
                 x=x,
                 y=g_train.mean_accuracy,
-                line_color="rgb(0,176,246)",
+                line_color=config.plots["inference"]["train_test"]["traces"][
+                    "mean_train_linecolor"
+                ],
                 name="Train",
             )
         )
@@ -113,13 +137,21 @@ def train_test_network(train, test):
             go.Scatter(
                 x=x,
                 y=g_test.mean_accuracy,
-                line_color="rgb(231,107,243)",
+                line_color=config.plots["inference"]["train_test"]["traces"][
+                    "mean_test_linecolor"
+                ],
                 name="Test",
             )
         )
 
         fig.update_traces(mode="lines")
-        fig.update_layout(title_text=f"Netowk's performance {metric} by round")
+        fig.update_layout(title_text=f"Netowk's performance {clean(metric)} by round")
+        fig.update_layout(config.plots["inference"]["train_test"]["layout"])
+        fig.update_layout(
+            xaxis_title_text=config.variables["algorithm_round"]["legend"],
+            yaxis_title_text=config.variables[metric]["legend"],
+            legend_title_text=config.variables["agent"]["legend"],
+        )
         figs.append(fig)
     return figs
 
@@ -143,7 +175,7 @@ def generate(config, download=False):
         updated_figs = []
         for F in figs:
             html_fig = F.to_html(full_html=False)
-            html_fig.replace("PNG", "SVG", 1)
-            html_fig.replace("png", "svg", 3)
+            html_fig = html_fig.replace("PNG", "SVG", 1)
+            html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)
         return updated_figs

@@ -6,6 +6,10 @@ import networkx as nx
 import numpy as np
 import warnings
 
+from config import Config, clean
+
+config = Config()
+
 warnings.filterwarnings("ignore")
 
 
@@ -43,7 +47,7 @@ def create_coordinates(messages):
 
 def create_nodes_plot(inference, x_coords, y_coords):
     nodes = inference.copy()
-    nodes = nodes[["agent", "timestamp", "test_accuracy"]]
+    nodes = nodes[["agent", "timestamp", metric]]
 
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
     nodes["timestamp"] = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
@@ -70,7 +74,7 @@ def create_nodes_plot(inference, x_coords, y_coords):
     nodes["X"] = nodes["agent"].apply(set_value, args=(x_coords,))
     nodes["Y"] = nodes["agent"].apply(set_value, args=(y_coords,))
     global range_color
-    range_color = [float(nodes.test_accuracy.min()), float(nodes.test_accuracy.max())]
+    range_color = [float(nodes[metric].min()), float(nodes[metric].max())]
     nodes["size"] = [35 for x in range(len(nodes))]
 
     # CREATE NODES PLOT
@@ -80,51 +84,44 @@ def create_nodes_plot(inference, x_coords, y_coords):
         x="X",
         y="Y",
         animation_frame="timestamp",
+        labels={"timestamp": "Second"},
         text="agent",
-        color="test_accuracy",
+        color=metric,
         size="size",
+        title=f"{config.variables[metric]["legend"]} evolution inside agents network",
         hover_name="agent",
         range_color=range_color,
     )
-    nodes_plot.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 50
+    nodes_plot.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = (
+        config.plots["network"]["nodes"]["other"]["frame_duration"]
+    )
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
-    i = 0.07
-    nodes_plot.update_traces(
-        textposition="top center", textfont_size=17, textfont_family="Arial Black"
-    )
-    nodes_plot.layout.template = "plotly_white"
-    nodes_plot.update_xaxes(
-        title=None,
-        range=[xmin - i, xmax + i],
-        showgrid=False,
-        zeroline=False,
-        showticklabels=False,
-    )
-    nodes_plot.update_yaxes(
-        title=None,
-        range=[ymin - i, ymax + i],
-        showgrid=False,
-        zeroline=False,
-        showticklabels=False,
-    )
-    nodes_plot.for_each_trace(lambda trace: trace.update(marker_size=35))
+
+    nodes_plot.update_traces(config.plots["network"]["nodes"]["traces"])
+
+    i = config.plots["network"]["nodes"]["other"]["border"]
+    nodes_plot.update_xaxes(range=[xmin - i, xmax + i])
+    nodes_plot.update_yaxes(range=[ymin - i, ymax + i])
+
+    nodes_plot.update_xaxes(config.plots["network"]["nodes"]["axes"])
+    nodes_plot.update_yaxes(config.plots["network"]["nodes"]["axes"])
+
+    marker_size = config.plots["network"]["nodes"]["other"]["marker_size"]
+    nodes_plot.for_each_trace(lambda trace: trace.update(marker_size=marker_size))
     nodes_plot.update_layout(
-        title_text="Test accuracy evolution inside agents network",
-        width=800,
-        height=800,
+        coloraxis_colorbar_title=config.variables[metric]["legend"]
     )
-    nodes_plot.update_layout(
-        coloraxis_colorbar_x=-0.15, coloraxis_colorbar_title="Test accuracy"
-    )
+
+    nodes_plot.update_layout(config.plots["network"]["nodes"]["layout"])
     return nodes_plot
 
 
-def create_edges_plot(messages, x_coords, y_coords):
+def create_edges_plot(messages, x_coords, y_coords, msg_type):
     # EDGES DF
     edges = messages.copy()
     edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
-        edges.type == "SEND-LAYERS"
+        edges.type == msg_type
     ]
     edges[["sender", "domain"]] = edges.sender.str.split("@", expand=True)
     edges[["to", "domain2"]] = edges.to.str.split("@", expand=True)
@@ -175,8 +172,8 @@ def create_edges_plot(messages, x_coords, y_coords):
         OldMax = edges.weight.max()
         OldRange = OldMax - OldMin
         NewMin = 0
-        NewMax = 20
-        NewRange = 20 - 0
+        NewMax = config.plots["network"]["edges"]["other"]["max_size_lines"]
+        NewRange = NewMax - NewMin
         return round((((value - OldMin) * NewRange) / OldRange) + NewMin)
 
     edges_plot = go.Figure()
@@ -230,7 +227,11 @@ def create_edges_plot(messages, x_coords, y_coords):
                 [str(time)],
                 {
                     "mode": "immediate",
-                    "transition": {"duration": 25},
+                    "transition": {
+                        "duration": config.plots["network"]["edges"]["other"][
+                            "transition_duration"
+                        ]
+                    },
                 },
             ],
             "label": str(time),
@@ -246,7 +247,12 @@ def create_edges_plot(messages, x_coords, y_coords):
                     args=[
                         None,
                         {
-                            "frame": {"duration": 50, "redraw": True},
+                            "frame": {
+                                "duration": config.plots["network"]["edges"]["other"][
+                                    "frame_duration"
+                                ],
+                                "redraw": True,
+                            },
                             "fromcurrent": True,
                         },
                     ],
@@ -278,22 +284,22 @@ def create_edges_plot(messages, x_coords, y_coords):
     ]
 
     edges_plot.update_layout(
-        width=800,
-        height=800,
         updatemenus=updatemenus,
         sliders=[sliders_dict],
+        title_text=f"{clean(msg_type)} messages evolution inside agents network",
     )
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
-    i = 0.07
+
+    i = config.plots["network"]["edges"]["other"]["border"]
     edges_plot.update_xaxes(range=[xmin - i, xmax + i])
     edges_plot.update_yaxes(range=[ymin - i, ymax + i])
-    edges_plot.update_traces(textfont_size=20)
 
-    edges_plot.layout.template = "plotly_white"
-    edges_plot.update_xaxes(showgrid=False, zeroline=False, showticklabels=False)
-    edges_plot.update_yaxes(showgrid=False, zeroline=False, showticklabels=False)
-    edges_plot.update_layout(legend_title="Number of messages")
+    edges_plot.update_xaxes(config.plots["network"]["edges"]["axes"])
+    edges_plot.update_yaxes(config.plots["network"]["edges"]["axes"])
+
+    edges_plot.update_traces(config.plots["network"]["edges"]["traces"])
+    edges_plot.update_layout(config.plots["network"]["edges"]["layout"])
     return edges_plot
 
 
@@ -309,29 +315,34 @@ def create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords):
     )
     combined_plot.for_each_trace(
         lambda trace: trace.update(
-            marker=dict(size=35, opacity=1, line=dict(color="DarkSlateGrey")),
+            marker=config.plots["network"]["network"]["traces"]["marker"],
         )
     )
-    combined_plot.update_layout(title_text="Network evolution")
     combined_plot.update_layout(
         coloraxis=dict(
-            colorbar=dict(x=-0.15, title="Test accuracy"),
+            colorbar=dict(x=-0.15, title=config.variables[metric]["legend"]),
             cmin=range_color[0],
             cmax=range_color[1],
-        )
+        ),
+        title_text=f"Network evolution: {config.variables[metric]['legend']} and {clean(msg_type)} messages",
     )
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
     i = 0.12
     combined_plot.update_xaxes(range=[xmin - i, xmax + i])
     combined_plot.update_yaxes(range=[ymin - i, ymax + i])
+
+    combined_plot.update_layout(config.plots["network"]["network"]["layout"])
     return combined_plot
 
 
 def generate(config, download=False):
     messages = pd.read_csv(config.experiment_path / r"message.csv")
     inference = pd.read_csv(config.experiment_path / r"nn_inference.csv")
-
+    global metric
+    metric = "test_accuracy"
+    global msg_type
+    msg_type = "SEND-LAYERS"
     x_coords, y_coords = create_coordinates(messages)
     nodes_plot = create_nodes_plot(inference, x_coords, y_coords)
     edges_plot = create_edges_plot(messages, x_coords, y_coords)
@@ -349,8 +360,8 @@ def generate(config, download=False):
     else:
         updated_figs = []
         for F in figs:
-            html_fig = F.to_html(full_html=False)
-            html_fig.replace("PNG", "SVG", 1)
-            html_fig.replace("png", "svg", 3)
+            html_fig = F.to_html(full_html=False, auto_play=False)
+            html_fig = html_fig.replace("PNG", "SVG", 1)
+            html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)
         return updated_figs

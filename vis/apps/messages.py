@@ -3,6 +3,10 @@ import plotly.express as px
 import pandas as pd
 import plotly.figure_factory as ff
 
+from config import Config
+
+config = Config()
+
 
 def heatmap_messages(data):
     data = data[["sender", "to"]]
@@ -19,7 +23,7 @@ def heatmap_messages(data):
     )
     fig.update_traces(text=data_cross, texttemplate="<b>%{text}</b>")
     fig.update_xaxes(side="top")
-    fig.update_layout(title_text="Total de mensajes enviados entre agentes")
+    fig.update_layout(config.plots["messages"]["heat_msg"]["layout"])
     return fig
 
 
@@ -45,7 +49,7 @@ def heatmap_sizes(data):
     )
     fig.update_traces(text=data_cross, texttemplate="<b>%{text}</b>")
     fig.update_xaxes(side="top")
-    fig.update_layout(title_text="Tamaño de la información enviada entre agentes")
+    fig.update_layout(config.plots["messages"]["heat_info"]["layout"])
     return fig
 
 
@@ -64,7 +68,7 @@ def statistics_messages(data):
         .round(2)
     )
     fig = ff.create_table(stats)
-    fig.update_layout(title_text="Tabla estadística por tipo de mensaje")
+    fig.update_layout(config.plots["messages"]["table_msg"]["layout"])
     return fig
 
 
@@ -79,13 +83,23 @@ def create_distribution_data(data):
 
 def distribution_messages(data):
     fig = px.histogram(data, x="timestamp_minutes")
-    fig.update_layout(title_text="Distribución de mensajes en el tiempo")
+    fig.update_layout(config.plots["messages"]["dist_msg"]["layout"])
+    fig.update_traces(config.plots["messages"]["dist_msg"]["traces"])
+    fig.update_layout(
+        xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
+        yaxis_title_text="Number of messages",
+    )
     return fig
 
 
 def distribution_messages_types(data):
     fig = px.histogram(data, x="timestamp_minutes", color="type")
-    fig.update_layout(title_text="Distribución de mensajes en el tiempo")
+    fig.update_layout(config.plots["messages"]["dist_msg_type"]["layout"])
+    fig.update_layout(
+        xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
+        yaxis_title_text="Number of messages",
+        legend_title_text="Type of messages",
+    )
     return fig
 
 
@@ -93,14 +107,22 @@ def distribution_info(data):
     fig = px.histogram(
         data, x="timestamp_minutes", y="size", color_discrete_sequence=["indianred"]
     )
-    fig.update_layout(title_text="Distribución de mensajes en el tiempo")
+    fig.update_layout(config.plots["messages"]["dist_info"]["layout"])
+    fig.update_traces(config.plots["messages"]["dist_info"]["traces"])
+    fig.update_layout(
+        xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
+        yaxis_title_text="Amount of information (Bytes)",
+    )
     return fig
 
 
 def distribution_info_type(data):
     fig = px.histogram(data, x="timestamp_minutes", y="size", color="type")
+    fig.update_layout(config.plots["messages"]["dist_info_type"]["layout"])
     fig.update_layout(
-        title_text="Distribución de mensajes en el tiempo por tipo de mensaje"
+        xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
+        yaxis_title_text="Amount of information (Bytes)",
+        legend_title_text="Type of messages",
     )
     return fig
 
@@ -128,7 +150,7 @@ def generate(config, download=False):
         updated_figs = []
         for F in figs:
             html_fig = F.to_html(full_html=False)
-            html_fig.replace("PNG", "SVG", 1)
-            html_fig.replace("png", "svg", 3)
+            html_fig = html_fig.replace("PNG", "SVG", 1)
+            html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)
         return updated_figs

@@ -15,10 +15,8 @@ import inference
 import network
 import download
 
-from dotenv import load_dotenv
 from config import Config
 
-load_dotenv()
 config = Config()
 
 

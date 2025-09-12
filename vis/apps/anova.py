@@ -9,6 +9,10 @@ import pingouin as pg
 import plotly.figure_factory as ff
 from statsmodels.multivariate.manova import MANOVA
 
+from config import Config, clean
+
+config = Config()
+
 experiment_variables = [
     "uuid4",
     "algorithm",
@@ -71,20 +75,22 @@ def create_df(config):
                 numerics = [data.test_loss.min()] + numeric + [time]
                 row = experiment_vals + [ag] + [descriptive] + numerics
                 df.loc[len(df)] = row
+    return df
 
 
 def create_atable(df):
-    atable = pg.anova(
-        data=df,
-        dv="maximum_accuracy_achieved",
-        between=["distribution", "ann"],
-        detailed=True,
-    ).round(4)
+    atable = (
+        df.groupby(["distribution", "ann"])
+        .agg(max_acc=("maximum_accuracy_achieved", "max"))
+        .reset_index()
+    )
     return atable
 
 
 def create_atable_fig(atable):
-    fig = ff.create_table(atable)
+    atable_c = atable.copy()
+    atable_c.columns = [clean(var) for var in atable_c.columns]
+    fig = ff.create_table(atable_c)
     fig.update_layout(
         title_text="Table of Minimum Loss achieved grouped by Type and Network"
     )
@@ -97,15 +103,14 @@ def create_interaction_plot(atable, var1, var2):
         x=var1,
         y="max_acc",
         color=var2,
-        title="Interaction plot: Network and Type",
-        template="seaborn",
-        labels={
-            "x": "Type",
-            "response": "Avg Minimum loss achieved",
-            "trace": "Network",
-        },
     ).update_traces(mode="lines+markers")
-    fig.update_layout(title_text="Interaction plot: Network and Type")
+    fig.update_layout(title_text=f"Interaction between {clean(var1)} and {clean(var2)}")
+    fig.update_layout(config.plots["anova"]["interaction"]["layout"])
+    fig.update_layout(
+        xaxis_title_text=config.variables[var1]["legend"],
+        yaxis_title_text=config.variables["max_acc"]["legend"],
+        legend_title_text=config.variables[var2]["legend"],
+    )
     return fig
 
 
@@ -116,9 +121,16 @@ def create_box_plot(df, var):
         y="maximum_accuracy_achieved",
         color=var,
         points="all",
-        template="seaborn",
     )
-    fig.update_layout(title_text="Distribution distribution")
+    fig.update_layout(
+        title_text=f"Distribution of {clean('maximum_accuracy_achieved')} by {clean(var)}"
+    )
+    fig.update_layout(config.plots["anova"]["box"]["layout"])
+    fig.update_layout(
+        xaxis_title_text=config.variables[var]["legend"],
+        yaxis_title_text=config.variables["maximum_accuracy_achieved"]["legend"],
+        legend_title_text=config.variables[var]["legend"],
+    )
     return fig
 
 
@@ -129,8 +141,10 @@ def create_anova(df):
         between=["distribution", "ann"],
         detailed=True,
     ).round(4)
-    fig = ff.create_table(atable)
-    fig.update_layout(title_text="ANOVA table")
+    atable_c = atable.copy()
+    atable_c.columns = [clean(var) for var in atable_c.columns]
+    fig = ff.create_table(atable_c)
+    fig.update_layout(config.plots["anova"]["anova"]["layout"])
     return fig
 
 
@@ -138,8 +152,10 @@ def create_tuckey_test(df):
     pg_test = pg.pairwise_tukey(
         data=df, dv="maximum_accuracy_achieved", between="distribution"
     ).round(3)
-    fig = ff.create_table(pg_test)
-    fig.update_layout(title_text="Post-hoc Tuckey Test")
+    pg_test_c = pg_test.copy()
+    pg_test_c.columns = [clean(var) for var in pg_test_c.columns]
+    fig = ff.create_table(pg_test_c)
+    fig.update_layout(config.plots["anova"]["tuckey"]["layout"])
     return fig
 
 
@@ -156,7 +172,7 @@ def create_nemenyi_test(df):
     )
     fig.update_traces(text=nemtable, texttemplate="%{text}")
     fig.update_xaxes(side="top")
-    fig.update_layout(title_text="Post-hoc Nemenyi Test")
+    fig.update_layout(config.plots["anova"]["nemenyi"]["layout"])
     return fig
 
 
@@ -169,18 +185,18 @@ def create_manova(df):
     return result
 
 
-def create_manova_figs(result):
+def create_manova_figs(result, var):
     intercept = result.results["Intercept"]["stat"]
     intercept.reset_index(inplace=True)
     intercept = intercept.rename(columns={"index": "tests"})
     fig = ff.create_table(intercept)
-    fig.update_layout(title_text="MANOVA table Intercept")
+    fig.update_layout(config.plots["anova"]["manova_inter"]["layout"])
 
-    distribution = result.results["distribution"]["stat"]
-    distribution.reset_index(inplace=True)
-    distribution = distribution.rename(columns={"index": "tests"})
-    fig2 = ff.create_table(distribution)
-    fig2.update_layout(title_text="MANOVA table Distribution")
+    var_results = result.results[var]["stat"]
+    var_results.reset_index(inplace=True)
+    var_results = var_results.rename(columns={"index": "tests"})
+    fig2 = ff.create_table(var_results)
+    fig2.update_layout(config.plots["anova"]["manova_var"]["layout"])
 
     return [fig, fig2]
 
@@ -193,12 +209,12 @@ def generate(config, download=False):
         create_interaction_plot(atable, "distribution", "ann"),
         create_interaction_plot(atable, "ann", "distribution"),
     ]
-    f3 = create_box_plot(atable)
+    f3 = create_box_plot(data, "distribution")
     f4 = create_anova(data)
     f5 = create_tuckey_test(data)
     f6 = create_nemenyi_test(data)
     manova = create_manova(data)
-    f7 = create_manova_figs(manova)
+    f7 = create_manova_figs(manova, "distribution")
     figs = [f1] + f2 + [f3, f4, f5, f6] + f7
     if download:
         root = "images"

@@ -5,6 +5,10 @@ import pandas as pd
 from itertools import groupby
 import numpy as np
 
+from config import Config, clean
+
+config = Config()
+
 
 def create_df(config):
     df = pd.read_csv(config.experiment_path / r"nn_convergence.csv")
@@ -57,6 +61,12 @@ def create_xy_scatter_plot(data, layer):
         range_y=[min_y, max_y],
     )
     fig.update_layout(title_text=f"{layer.upper()} layer evolution of agents")
+    fig.update_layout(config.plots["convergence"]["xy_scatter"]["layout"])
+    fig.update_layout(
+        xaxis_title_text=clean(layers_opts[layer][0]),
+        yaxis_title_text=clean(layers_opts[layer][1]),
+        legend_title_text=config.variables["agent"]["legend"],
+    )
     return fig
 
 
@@ -91,6 +101,7 @@ def create_line_plot(data, sublayer):
         range_y=[min_x, max_x],
         line_shape="spline",  # make a line graph curvy
     )
+
     line_plot.update_traces(showlegend=False)  # legend will be from line graph
     for frame in line_plot.frames:
         for data in frame.data:
@@ -109,25 +120,30 @@ def create_combined_plot(scatter_plot, line_plot, sublayer):
         layout=line_plot.layout,
     )
 
-    combined_plot.update_yaxes(
-        gridcolor="#7a98cf", griddash="dot", gridwidth=0.5, linewidth=2, tickwidth=2
+    combined_plot.update_yaxes(config.plots["convergence"]["combined"]["yaxes"])
+
+    combined_plot.update_xaxes(config.plots["convergence"]["combined"]["xaxes"])
+
+    combined_plot.update_traces(config.plots["convergence"]["combined"]["traces"])
+
+    combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["frame"]["duration"] = (
+        config.plots["convergence"]["combined"]["updatemenus"]["frame_duration"]
     )
-
-    combined_plot.update_xaxes(title_font=dict(size=16), linewidth=2, tickwidth=2)
-
-    combined_plot.update_traces(line=dict(width=5), marker=dict(size=25))
-
-    # adjust speed of animation
-    combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["frame"]["duration"] = 120
     combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
         "duration"
-    ] = 50
+    ] = config.plots["convergence"]["combined"]["updatemenus"]["transition_duration"]
     combined_plot.layout.updatemenus[0].buttons[0]["args"][1]["transition"][
         "redraw"
-    ] = False
+    ] = config.plots["convergence"]["combined"]["updatemenus"]["redraw"]
     combined_plot.update_layout(
         title_text=f"{sublayer.upper()} layer evolution of agents"
     )
+    combined_plot.update_layout(
+        xaxis_title_text=config.variables["algorithm_round"]["legend"],
+        yaxis_title_text=clean(sublayer),
+        legend_title_text=config.variables["agent"]["legend"],
+    )
+    combined_plot.update_layout(config.plots["convergence"]["combined"]["layout"])
     return combined_plot
 
 
@@ -176,7 +192,7 @@ def generate(config, download=False):
     else:
         updated_figs = []
         for F in figs:
-            html_fig = F.to_html(full_html=False)
+            html_fig = F.to_html(full_html=False, auto_play=False)
             html_fig = html_fig.replace("PNG", "SVG", 1)
             html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)

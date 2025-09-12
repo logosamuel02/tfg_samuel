@@ -4,6 +4,10 @@ import plotly.graph_objects as go
 import pandas as pd
 from more_itertools import sort_together
 
+from config import Config
+
+config = Config()
+
 
 def violin_plot(data):
     agents = list(map(lambda x: x.split("@")[0], sorted(data.agent.unique())))
@@ -28,7 +32,13 @@ def violin_plot(data):
                 meanline_visible=True,
             )
         )
-    fig.update_layout(title_text="Seconds to complete training round by agent")
+    fig.update_layout(config.plots["algorithm"]["violin"]["layout"])
+    fig.update_traces(config.plots["algorithm"]["violin"]["traces"])
+    fig.update_layout(
+        xaxis_title_text=config.variables["agent"]["legend"],
+        yaxis_title_text=config.variables["seconds_to_complete"]["legend"],
+        legend_title_text=config.variables["agent"]["legend"],
+    )
     return fig
 
 
@@ -41,35 +51,38 @@ def execution_time_plot(data):
     for i, agent in enumerate(agents):
         dates = list(data.timestamp[data.agent == agent])
         rang = dates[-1] - dates[0]
-        times.append(rang.total_seconds())
+        times.append(round(rang.total_seconds(), 2))
         elapsed.append(dates[-1])
 
     m = min(elapsed)
     for i, agent in enumerate(agents):
-        elapsed[i] = (elapsed[i] - m).total_seconds()
+        elapsed[i] = round((elapsed[i] - m).total_seconds(), 2)
 
     elapsed, agents, times = sort_together((elapsed, agents, times))
 
     df = pd.DataFrame(
         {
             "seconds": times,
-            "agents": list(map(lambda x: x.split("@")[0], agents)),
-            "seconds elapsed": elapsed,
+            "agent": list(map(lambda x: x.split("@")[0], agents)),
+            "seconds_elapsed": elapsed,
         }
     )
     fig = px.bar(
         df,
-        x="seconds elapsed",
-        y="agents",
-        hover_data=["seconds", "seconds elapsed"],
-        color="agents",
+        x="seconds_elapsed",
+        y="agent",
+        hover_data=["seconds", "seconds_elapsed"],
+        color="agent",
         labels={"pop": "seconds"},
         text="seconds",
-        title="Tiempos de ejecución ordenados por agente",
         orientation="h",
     )
-    fig.update_traces(
-        textfont_size=12, textangle=0, textposition="outside", cliponaxis=False
+    fig.update_layout(config.plots["algorithm"]["bar"]["layout"])
+    fig.update_traces(config.plots["algorithm"]["bar"]["traces"])
+    fig.update_layout(
+        xaxis_title_text=config.variables["seconds_elapsed"]["legend"],
+        yaxis_title_text=config.variables["agent"]["legend"],
+        legend_title_text=config.variables["agent"]["legend"],
     )
     return fig
 
@@ -91,7 +104,7 @@ def generate(config, download=False):
         updated_figs = []
         for F in figs:
             html_fig = F.to_html(full_html=False)
-            html_fig.replace("PNG", "SVG", 1)
-            html_fig.replace("png", "svg", 3)
+            html_fig = html_fig.replace("PNG", "SVG", 1)
+            html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append(html_fig)
         return updated_figs

@@ -1,0 +1,232 @@
+{
+    "test_precision": {
+        "legend": "Test precision",
+        "description": "Test precision"
+    },
+    "description": {
+        "legend": "Learning phase",
+        "description": "Learning phase"
+    },
+    "epoch_or_iteration": {
+        "legend": "Epoch or iteration",
+        "description": "Epoch or iteration. Epochs are related to train, valdiation ot test phases, but iterations are related to Consensus phases."
+    },
+    "epoch": {
+        "legend": "Training Epoch",
+        "description": "Training Epoch"
+    },
+    "type": {
+        "legend": "Type of the message",
+        "description": "Type of the message"
+    },
+    "seconds_to_complete": {
+        "legend": "Seconds elapsed per training round",
+        "description": "Seconds elapsed per training round"
+    },
+    "seconds_elapsed": {
+        "legend": "Seconds elapsed after first agent finished",
+        "description": "Seconds elapsed after first agent finished"
+    },
+    "loss": {
+        "legend": "Training Loss",
+        "description": "Training Loss"
+    },
+    "seconds_to_complete_test": {
+        "legend": "Seconds elapsed per test round",
+        "description": "Seconds elapsed per test round"
+    },
+    "validation_recall": {
+        "legend": "Validation recall",
+        "description": "Validation recall"
+    },
+    "seconds_to_complete_validation": {
+        "legend": "Seconds elapsed per validation round",
+        "description": "Seconds elapsed per validation round"
+    },
+    "log_timestamp": {
+        "legend": "Timestamp",
+        "description": "Timestamp"
+    },
+    "test_loss": {
+        "legend": "Test loss",
+        "description": "Test loss"
+    },
+    "size": {
+        "legend": "Size",
+        "description": "Size"
+    },
+    "layer": {
+        "legend": "ANN layer",
+        "description": "ANN Layer"
+    },
+    "algorithm_round": {
+        "legend": "Algorithm round",
+        "description": "Algorithm round"
+    },
+    "accuracy": {
+        "legend": "Training Accuracy",
+        "description": "Training Accuracy"
+    },
+    "start_timestamp": {
+        "legend": "Start timestamp",
+        "description": "Start timestamp"
+    },
+    "count": {
+        "legend": "Sample count",
+        "description": "Sample count"
+    },
+    "agent": {
+        "legend": "Agents",
+        "description": "Agents"
+    },
+    "timestamp": {
+        "legend": "Timestamp",
+        "description": "Timestamp"
+    },
+    "weight": {
+        "legend": "Mean of the weights",
+        "description": "Mean of thes weights"
+    },
+    "weight_id": {
+        "legend": "Weight id",
+        "description": "Weight id"
+    },
+    "to": {
+        "legend": "Agent Receiver",
+        "description": "Agent Receiver"
+    },
+    "test_accuracy": {
+        "legend": "Test accuracy",
+        "description": "Test accuracy"
+    },
+    "precision": {
+        "legend": "Training Precision",
+        "description": " Training Precision"
+    },
+    "thread": {
+        "legend": "Conversation Thread",
+        "description": "Conversation Thread"
+    },
+    "test_recall": {
+        "legend": "Test recall",
+        "description": "Test recall"
+    },
+    "validation_loss": {
+        "legend": "Validation loss",
+        "description": "Validation loss"
+    },
+    "sender": {
+        "legend": "Agent Sender",
+        "description": "Agent Sender"
+    },
+    "label": {
+        "legend": "Data Label",
+        "description": "Data Label"
+    },
+    "recall": {
+        "legend": "Training Recall",
+        "description": "Training Recall"
+    },
+    "log_name": {
+        "legend": "Agent Name",
+        "description": "Agent Name"
+    },
+    "f1_score": {
+        "legend": "Training F1 score",
+        "description": "Training F1 score"
+    },
+    "validation_f1_score": {
+        "legend": "Validation f1 score",
+        "description": "Validation f1 score"
+    },
+    "validation_accuracy": {
+        "legend": "Validation accuracy",
+        "description": "Validation accuracy"
+    },
+    "test_f1_score": {
+        "legend": "Test f1 score",
+        "description": "Test f1 score"
+    },
+    "validation_precision": {
+        "legend": "Validation precision",
+        "description": "Validation precision"
+    },
+    "minimum_loss_achieved": {
+        "legend": "Minimum loss achieved",
+        "description": "Minimum loss achieved"
+    },
+    "maximum_accuracy_achieved": {
+        "legend": "Maximum accuracy achieved",
+        "description": "Maximum accuracy achieved"
+    },
+    "maximum_recall_achieved": {
+        "legend": "Maximum recall achieved",
+        "description": "Maximum recall achieved"
+    },
+    "maximum_precision_achieved": {
+        "legend": "Maximum precision achieved",
+        "description": "Maximum precision achieved"
+    },
+    "maximum_f1_achieved": {
+        "legend": "Maximum f1 score achieved",
+        "description": "Maximum f1 score achieved"
+    },
+    "mean_seconds_by_round": {
+        "legend": "Mean Seconds by Round",
+        "description": "Mean Seconds by Round"
+    },
+    "distribution": {
+        "legend": "Distribution",
+        "description": "Distribution"
+    },
+    "ann": {
+        "legend": "Artificial neural network",
+        "description": "Artificial neural network"
+    },
+    "algorithm": {
+        "legend": "Algorithm",
+        "description": "Algorithm"
+    },
+    "consensus_iterations": {
+        "legend": "Consensus iterations",
+        "description": "Consensus iterations"
+    },
+    "training_epochs": {
+        "legend": "Training epochs",
+        "description": "Training epochs"
+    },
+    "xmpp_domain": {
+        "legend": "XMPP domain",
+        "description": "XMPP domain"
+    },
+    "graph_path": {
+        "legend": "Grapth path",
+        "description": "Grapth path"
+    },
+    "dataset": {
+        "legend": "Dataset",
+        "description": "Dataset"
+    },
+    "seed": {
+        "legend": "Seed",
+        "description": "Seed"
+    },
+    "max_acc": {
+        "legend": "Maximum accuracy achieved",
+        "description": "Maximum accuracy achieved"
+    },
+    "graph_path2": {
+        "legend": "Algorithm",
+        "description": "Algorithm"
+    },
+    "experiment": {
+        "legend": "Experiment",
+        "description": "Algorithm"
+    },
+    "timestamp_minutes": {
+        "legend": "Execution time in minutes",
+        "description": "Execution time in minutes"
+    }
+    
+
+}

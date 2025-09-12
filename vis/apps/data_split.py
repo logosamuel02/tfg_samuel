@@ -5,6 +5,10 @@ import numpy as np
 import branca.colormap as cm
 from matplotlib.colors import to_hex
 
+from config import Config
+
+config = Config()
+
 
 def bubble_plots(data):
     agents = data.agent.unique()
@@ -49,7 +53,10 @@ def bubble_plots(data):
         X_sizes = X.copy()
         for i in range(M):
             xmin, xmax = X_sizes[i, :].min(), X_sizes[i, :].max()
-            tmin, tmax = 20, 55
+            tmin, tmax = (
+                config.plots["data_split"]["bubble"]["size_factors"]["min_bubble_size"],
+                config.plots["data_split"]["bubble"]["size_factors"]["max_bubble_size"],
+            )
             X_sizes[i, :] = (X_sizes[i, :] - xmin) / (xmax - xmin) * (
                 tmax - tmin
             ) + tmin
@@ -82,32 +89,29 @@ def bubble_plots(data):
             )
         )
 
-        # Update the figure layout with the dropdown menu
         fig.update_layout(
-            title_text=f"Categorical bubble plot for {phase}",
+            title_text=f"Distribution of samples for {phase}",
             xaxis_title="Agents",
-            yaxis_title="Labels",
+            yaxis_title="Target labels",
         )
 
+        width_factor = config.plots["data_split"]["bubble"]["size_factors"]["width"]
+        height_factor = config.plots["data_split"]["bubble"]["size_factors"]["height"]
         fig.update_layout(xaxis_range=[0, len(agents) + 1])
         fig.update_layout(yaxis_range=[0, len(colors) - 1])
-        fig.update_layout(width=143 * (len(agents) + 2))
-        fig.update_layout(height=67 * len(colors))
-        fig.update_layout(plot_bgcolor="rgb(256,256,256)")
+        fig.update_layout(width=width_factor * (len(agents) + 2))
+        fig.update_layout(height=height_factor * len(colors))
         fig.update_xaxes(
             ticktext=agents,
             tickvals=list(range(1, len(agents) + 1)),
-            showgrid=True,
-            gridwidth=1,
-            gridcolor="grey",
         )
         fig.update_yaxes(
             ticktext=sorted(labels),
             tickvals=list(range(1, len(labels) + 1)),
-            showgrid=True,
-            gridwidth=1,
-            gridcolor="grey",
         )
+        fig.update_layout(config.plots["data_split"]["bubble"]["layout"])
+        fig.update_xaxes(config.plots["data_split"]["bubble"]["axes"])
+        fig.update_yaxes(config.plots["data_split"]["bubble"]["axes"])
         figs.append(fig)
     return figs
 
