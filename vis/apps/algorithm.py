@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from more_itertools import sort_together
 
-from config import Config
+from config import Config, save_or_print_figures
 
 config = Config()
 
@@ -92,19 +92,4 @@ def generate(config, download=False):
     f1 = violin_plot(data)
     f2 = execution_time_plot(data)
     figs = [f1, f2]
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

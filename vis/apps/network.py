@@ -6,7 +6,7 @@ import networkx as nx
 import numpy as np
 import warnings
 
-from config import Config, clean
+from config import Config, clean, save_or_print_figures
 
 config = Config()
 
@@ -88,7 +88,7 @@ def create_nodes_plot(inference, x_coords, y_coords):
         text="agent",
         color=metric,
         size="size",
-        title=f"{config.variables[metric]["legend"]} evolution inside agents network",
+        title=f"{config.variables[metric]['legend']} evolution inside agents network",
         hover_name="agent",
         range_color=range_color,
     )
@@ -117,7 +117,7 @@ def create_nodes_plot(inference, x_coords, y_coords):
     return nodes_plot
 
 
-def create_edges_plot(messages, x_coords, y_coords, msg_type):
+def create_edges_plot(messages, x_coords, y_coords):
     # EDGES DF
     edges = messages.copy()
     edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
@@ -349,19 +349,4 @@ def generate(config, download=False):
     combined_plot = create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords)
 
     figs = [combined_plot, nodes_plot, edges_plot]
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False, auto_play=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

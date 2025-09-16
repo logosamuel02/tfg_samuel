@@ -3,7 +3,7 @@ import plotly.express as px
 import pandas as pd
 import plotly.figure_factory as ff
 
-from config import Config
+from config import Config, save_or_print_figures
 
 config = Config()
 
@@ -138,19 +138,4 @@ def generate(config, download=False):
     f5 = distribution_info(dist_data)
     f6 = distribution_info_type(dist_data)
     figs = [f0, f1, f2, f3, f4, f5, f6]
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

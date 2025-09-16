@@ -34,9 +34,7 @@
             "layout": {
                 "template": "seaborn",
                 "title_text": "Post-hoc Nemenyi Test",
-                "coloraxis_colorscale": "Cividis",
-                "width": 1000,
-                "height": 600
+                "coloraxis_colorscale": "Cividis"
             }
         },
         "manova_inter": {
@@ -104,19 +102,13 @@
         "heat_msg": {
             "layout": {
                 "template": "seaborn",
-                "title_text": "Total messages sent between agents",
-                "coloraxis_colorscale":"Cividis",
-                "width": 1000,
-                "height": 600
+                "title_text": "Total messages sent between agents"
             }
         },
         "heat_info": {
             "layout": {
                 "template": "seaborn",
-                "title_text": "Information (MB) sent between agents",
-                "coloraxis_colorscale":"Cividis",
-                "width": 1000,
-                "height": 600
+                "title_text": "Information (MB) sent between agents"
             }
         },
         "table_msg": {

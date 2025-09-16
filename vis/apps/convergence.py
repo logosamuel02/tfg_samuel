@@ -5,7 +5,7 @@ import pandas as pd
 from itertools import groupby
 import numpy as np
 
-from config import Config, clean
+from config import Config, clean, save_or_print_figures
 
 config = Config()
 
@@ -181,19 +181,4 @@ def generate(config, download=False):
             )
             figs.append(combined_plot)
         print(f"Created plots for {layer.upper()} layer")
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False, auto_play=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

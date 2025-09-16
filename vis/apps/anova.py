@@ -9,7 +9,7 @@ import pingouin as pg
 import plotly.figure_factory as ff
 from statsmodels.multivariate.manova import MANOVA
 
-from config import Config, clean
+from config import Config, clean, save_or_print_figures
 
 config = Config()
 
@@ -189,13 +189,13 @@ def create_manova_figs(result, var):
     intercept = result.results["Intercept"]["stat"]
     intercept.reset_index(inplace=True)
     intercept = intercept.rename(columns={"index": "tests"})
-    fig = ff.create_table(intercept)
+    fig = ff.create_table(intercept.round(3))
     fig.update_layout(config.plots["anova"]["manova_inter"]["layout"])
 
     var_results = result.results[var]["stat"]
     var_results.reset_index(inplace=True)
     var_results = var_results.rename(columns={"index": "tests"})
-    fig2 = ff.create_table(var_results)
+    fig2 = ff.create_table(var_results.round(3))
     fig2.update_layout(config.plots["anova"]["manova_var"]["layout"])
 
     return [fig, fig2]
@@ -216,19 +216,4 @@ def generate(config, download=False):
     manova = create_manova(data)
     f7 = create_manova_figs(manova, "distribution")
     figs = [f1] + f2 + [f3, f4, f5, f6] + f7
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

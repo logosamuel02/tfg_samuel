@@ -30,10 +30,17 @@ html = """
 
 def download(config):
     anova.generate(config=config, download=True)
+    print("Anova finished")
     algorithm.generate(config=config, download=True)
+    print("Algorithm finished")
     data_split.generate(config=config, download=True)
+    print("Data split finished")
     messages.generate(config=config, download=True)
+    print("Messages finished")
     convergence.generate(config=config, download=True)
+    print("Convergence finished")
     inference.generate(config=config, download=True)
+    print("Inference finished")
     network.generate(config=config, download=True)
+    print("Network finished")
     return html

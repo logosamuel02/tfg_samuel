@@ -5,7 +5,7 @@ import numpy as np
 import branca.colormap as cm
 from matplotlib.colors import to_hex
 
-from config import Config
+from config import Config, save_or_print_figures
 
 config = Config()
 
@@ -119,19 +119,4 @@ def bubble_plots(data):
 def generate(config, download=False):
     data = pd.read_csv(config.experiment_path / r"data_split.csv")
     figs = bubble_plots(data)
-    if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-        for i, F in enumerate(figs):
-            F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
-    else:
-        updated_figs = []
-        for F in figs:
-            html_fig = F.to_html(full_html=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append(html_fig)
-        return updated_figs
+    return save_or_print_figures(download, figs)

@@ -14,42 +14,47 @@ import convergence
 import inference
 import network
 import download
+from settings import page
 
 from config import Config
 
 config = Config()
 
 
+async def SETTINGS(request):
+    return {"figures": anova.generate(config=config, download=False)}
+
+
 async def ANOVA(request):
-    return {"lista": anova.generate(config=config, download=False)}
+    return {"figures": anova.generate(config=config, download=False)}
 
 
 async def ALGORITHM(request):
-    return {"lista": algorithm.generate(config=config, download=False)}
+    return {"figures": algorithm.generate(config=config, download=False)}
 
 
 async def DATA_SPLIT(request):
-    return {"lista": data_split.generate(config=config, download=False)}
+    return {"figures": data_split.generate(config=config, download=False)}
 
 
 async def MESSAGES(request):
-    return {"lista": messages.generate(config=config, download=False)}
+    return {"figures": messages.generate(config=config, download=False)}
 
 
 async def CONVERGENCE(request):
-    return {"lista": convergence.generate(config=config, download=False)}
+    return {"figures": convergence.generate(config=config, download=False)}
 
 
 async def INFERENCE(request):
-    return {"lista": inference.generate(config=config, download=False)}
+    return {"figures": inference.generate(config=config, download=False)}
 
 
 async def NETWORK(request):
-    return {"lista": network.generate(config=config, download=False)}
+    return {"figures": network.generate(config=config, download=False)}
 
 
 async def DOWNLOAD(request):
-    return {"lista": download.download(config=config)}
+    return {"figures": download.download(config=config)}
 
 
 class DummyAgent(Agent):
@@ -76,52 +81,60 @@ async def main():
     dummy = DummyAgent("dummy@localhost", "your_password")
     print("DummyAgent started. Check its console to see the output.")
 
-    dummy.web.add_menu_entry("Anova", "/spade/anova", "fa fa-bolt")
-    dummy.web.add_menu_entry("Algorithm", "/spade/algorithm", "fa fa-bomb")
-    dummy.web.add_menu_entry("Data Split", "/spade/data_split", "fa fa-bomb")
-    dummy.web.add_menu_entry("Messages", "/spade/messages", "fa fa-bomb")
-    dummy.web.add_menu_entry("Convergence", "/spade/convergence", "fa fa-bomb")
-    dummy.web.add_menu_entry("Inference", "/spade/inference", "fa fa-bomb")
-    dummy.web.add_menu_entry("Network", "/spade/network", "fa fa-bomb")
-    dummy.web.add_menu_entry("Download", "/spade/download", "fa fa-bomb")
+    dummy.web.add_menu_entry("Settings", "/manager/plots/settings", "fa fa-sliders")
+    dummy.web.add_menu_entry("Anova", "/manager/plots/anova", "fa fa-bolt")
+    dummy.web.add_menu_entry("Algorithm", "/manager/plots/algorithm", "fa fa-rocket")
+    dummy.web.add_menu_entry("Data Split", "/manager/plots/data_split", "fa fa-bomb")
+    dummy.web.add_menu_entry("Messages", "/manager/plots/messages", "fa fa-comments")
+    dummy.web.add_menu_entry(
+        "Convergence", "/manager/plots/convergence", "fa fa-map-pin"
+    )
+    dummy.web.add_menu_entry("Inference", "/manager/plots/inference", "fa fa-forward")
+    dummy.web.add_menu_entry("Network", "/manager/plots/network", "fa fa-sitemap")
+    dummy.web.add_menu_entry("Download", "/manager/plots/download", "fa fa-arrow-down")
 
     dummy.web.add_get(
-        "/spade/anova",
+        "/manager/plots/settings",
         ANOVA,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
-        "/spade/algorithm",
+        "/manager/plots/anova",
+        ANOVA,
+        template="plots.html",
+    )
+    dummy.web.add_get(
+        "/manager/plots/algorithm",
         ALGORITHM,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/data_split",
+        "/manager/plots/data_split",
         DATA_SPLIT,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/messages",
+        "/manager/plots/messages",
         MESSAGES,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/convergence",
+        "/manager/plots/convergence",
         CONVERGENCE,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/inference",
+        "/manager/plots/inference",
         INFERENCE,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/network",
+        "/manager/plots/network",
         NETWORK,
         template="template2.html",
     )
     dummy.web.add_get(
-        "/spade/download",
+        "/manager/plots/download",
         DOWNLOAD,
         template="template2.html",
     )
