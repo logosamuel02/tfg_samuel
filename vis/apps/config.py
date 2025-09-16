@@ -3,32 +3,32 @@ import json
 from plotly.graph_objects import Figure
 from pydantic import BaseModel, DirectoryPath
 from dotenv import load_dotenv
-from typing import List
+from typing import List, Dict
 from pathlib import Path
 
 load_dotenv()
 
 
 def clean(var: str) -> str:
-    var = " ".join(var.split("_"))
+    var: str = " ".join(var.split("_"))
     var = var.replace(".", " ")
     return var.capitalize()
 
 
 def save_or_print_figures(download: bool, figs: List[Figure]) -> List[str] | None:
     if download:
-        root = "images"
-        folder = f"{root}/{__name__.split('.')[0]}"
-        isExist = os.path.exists(folder)
+        root: str = "images"
+        folder: str = f"{root}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
         for i, F in enumerate(figs):
             F.write_image(f"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
     else:
-        updated_figs = []
+        updated_figs: List = []
         for F in figs:
-            title = F.layout.title.text
-            html_fig = F.to_html(full_html=False)
+            title: str = F.layout.title.text
+            html_fig: str = F.to_html(full_html=False)
             html_fig = html_fig.replace("PNG", "SVG", 1)
             html_fig = html_fig.replace("png", "svg", 3)
             updated_figs.append([title, html_fig])
@@ -46,11 +46,11 @@ class Config(BaseModel):
     variables: None = None
 
     def model_post_init(self, __context):
-        self.source_path = Path(rf"{self.source_path}")
-        self.experiment_path = (
+        self.source_path: Path = Path(rf"{self.source_path}")
+        self.experiment_path: Path = (
             self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
         )
-        self.fig_buttons = dict(
+        self.fig_buttons: Dict = dict(
             dragmode="drawopenpath",
             newshape_line_color="cyan",
             modebar_add=[
@@ -63,10 +63,10 @@ class Config(BaseModel):
             ],
         )
         with open(r"plots_config.json") as file:
-            self.plots = json.load(file)
+            self.plots: Dict = json.load(file)
 
         with open(r"variables.json") as file:
-            self.variables = json.load(file)
+            self.variables: Dict = json.load(file)
 
 
 config = Config()

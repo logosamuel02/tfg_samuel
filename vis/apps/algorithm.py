@@ -1,27 +1,32 @@
-import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from more_itertools import sort_together
-
+from pandas.core.frame import DataFrame
+from plotly.graph_objects import Figure
+from pandas._libs.tslibs.timestamps import Timestamp
+from pandas._libs.tslibs.timedeltas import Timedelta
+from typing import List
 from config import Config, save_or_print_figures
 
 config = Config()
 
 
-def violin_plot(data):
-    agents = list(map(lambda x: x.split("@")[0], sorted(data.agent.unique())))
+def violin_plot(data: DataFrame) -> Figure:
+    agents: List[str] = list(
+        map(lambda x: x.split("@")[0], sorted(data.agent.unique()))
+    )
     times = []
     for agent in agents:
-        agent_data = data[(data.agent == agent + "@localhost")]
-        time = list(agent_data.seconds_to_complete)
+        agent_data: DataFrame = data[(data.agent == agent + "@localhost")]
+        time: List[int] = list(agent_data.seconds_to_complete)
         times.append(time)
 
-    df_bolos = pd.DataFrame(columns=agents)
+    df_bolos: DataFrame = pd.DataFrame(columns=agents)
     for t, a in zip(times, agents):
         df_bolos[a] = t
     df_bolos = df_bolos.melt()
-    fig = go.Figure()
+    fig: Figure = go.Figure()
     for agent in agents:
         fig.add_trace(
             go.Violin(
@@ -42,32 +47,32 @@ def violin_plot(data):
     return fig
 
 
-def execution_time_plot(data):
-    data = data[data.algorithm_round <= 100]
+def execution_time_plot(data: DataFrame) -> Figure:
+    data: DataFrame = data[data.algorithm_round <= 100]
     data.timestamp = pd.to_datetime(data.timestamp)
-    agents = data.agent.unique()
+    agents: List[str] = data.agent.unique()
     times = []
     elapsed = []
     for i, agent in enumerate(agents):
-        dates = list(data.timestamp[data.agent == agent])
-        rang = dates[-1] - dates[0]
+        dates: List[Timestamp] = list(data.timestamp[data.agent == agent])
+        rang: Timedelta = dates[-1] - dates[0]
         times.append(round(rang.total_seconds(), 2))
         elapsed.append(dates[-1])
 
-    m = min(elapsed)
+    m: Timestamp = min(elapsed)
     for i, agent in enumerate(agents):
         elapsed[i] = round((elapsed[i] - m).total_seconds(), 2)
 
     elapsed, agents, times = sort_together((elapsed, agents, times))
 
-    df = pd.DataFrame(
+    df: DataFrame = pd.DataFrame(
         {
             "seconds": times,
             "agent": list(map(lambda x: x.split("@")[0], agents)),
             "seconds_elapsed": elapsed,
         }
     )
-    fig = px.bar(
+    fig: Figure = px.bar(
         df,
         x="seconds_elapsed",
         y="agent",
@@ -87,9 +92,9 @@ def execution_time_plot(data):
     return fig
 
 
-def generate(config, download=False):
-    data = pd.read_csv(config.experiment_path / r"algorithm.csv")
-    f1 = violin_plot(data)
-    f2 = execution_time_plot(data)
-    figs = [f1, f2]
+def generate(config: Config, download: bool = False) -> list[str] | None:
+    data: DataFrame = pd.read_csv(config.experiment_path / r"algorithm.csv")
+    f1: Figure = violin_plot(data)
+    f2: Figure = execution_time_plot(data)
+    figs: List[Figure] = [f1, f2]
     return save_or_print_figures(download, figs)

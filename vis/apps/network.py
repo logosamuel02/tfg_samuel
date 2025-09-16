@@ -4,8 +4,13 @@ import plotly.graph_objects as go
 import pandas as pd
 import networkx as nx
 import numpy as np
+import numpy.typing as npt
 import warnings
-
+from pandas.core.frame import DataFrame
+from plotly.graph_objects import Figure
+from networkx.classes import Graph
+from pandas._libs.tslibs.timestamps import Timestamp
+from typing import List, Dict
 from config import Config, clean, save_or_print_figures
 
 config = Config()
@@ -13,20 +18,22 @@ config = Config()
 warnings.filterwarnings("ignore")
 
 
-def create_coordinates(messages):
+def create_coordinates(
+    messages: DataFrame,
+) -> List[Dict[str : npt.NDArray[np.float64]]]:
     # CONVERT DATA
-    messages_mod = messages.copy()
+    messages_mod: DataFrame = messages.copy()
     messages_mod = messages_mod[["sender", "to"]][(messages_mod.algorithm_round <= 100)]
     messages_mod.sender = messages_mod.sender.apply(lambda x: x.split("@")[0])
     messages_mod.to = messages_mod.to.apply(lambda x: x.split("@")[0])
 
-    agents = sorted(messages_mod.sender.unique())
+    agents: List[str] = sorted(messages_mod.sender.unique())
 
     # GENERATE COORDINATES
-    cross = pd.crosstab(index=messages_mod.sender, columns=messages_mod.to)
-    G = nx.random_geometric_graph(len(agents), 0)
+    cross: DataFrame = pd.crosstab(index=messages_mod.sender, columns=messages_mod.to)
+    G: Graph = nx.random_geometric_graph(len(agents), 0)
     G = nx.relabel_nodes(G, {i: a for i, a in enumerate(agents)})
-    tuples = cross.stack().reset_index()
+    tuples: DataFrame = cross.stack().reset_index()
     tuples = tuples[tuples[0] > 0]
     tuples = list(tuples.itertuples(index=False))
     G.add_weighted_edges_from(tuples)
@@ -40,25 +47,33 @@ def create_coordinates(messages):
 
     np.random.seed(2)
 
-    x_dictionary = {x: node_x[i] for i, x in enumerate(agents)}
-    y_dictionary = {x: node_y[i] for i, x in enumerate(agents)}
+    x_dictionary: Dict[str : npt.NDArray[np.float64]] = {
+        x: node_x[i] for i, x in enumerate(agents)
+    }
+    y_dictionary: Dict[str : npt.NDArray[np.float64]] = {
+        x: node_y[i] for i, x in enumerate(agents)
+    }
     return x_dictionary, y_dictionary
 
 
-def create_nodes_plot(inference, x_coords, y_coords):
-    nodes = inference.copy()
+def create_nodes_plot(
+    inference: DataFrame,
+    x_coords: Dict[str : npt.NDArray[np.float64]],
+    y_coords: Dict[str : npt.NDArray[np.float64]],
+) -> Figure:
+    nodes: DataFrame = inference.copy()
     nodes = nodes[["agent", "timestamp", metric]]
 
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
     nodes["timestamp"] = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
-    first_date = nodes.timestamp.min()
+    first_date: Timestamp = nodes.timestamp.min()
     nodes["timestamp"] = nodes.timestamp.apply(
         lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
     )
     ## CONVERT TO PANEL DATA
     nodes["agent_id"] = nodes.groupby(nodes.columns.tolist(), sort=False).ngroup() + 1
-    mux = pd.MultiIndex.from_product(
+    mux: DataFrame = pd.MultiIndex.from_product(
         [nodes["timestamp"].unique(), np.array(nodes.agent.unique())],
         names=["timestamp", "agent"],
     )
@@ -68,18 +83,23 @@ def create_nodes_plot(inference, x_coords, y_coords):
         nodes[nodes.agent == agent] = nodes[nodes.agent == agent].fillna(method="ffill")
     nodes = nodes.fillna(0)
 
-    def set_value(row_number, assigned_value):
+    def set_value(
+        row_number: str, assigned_value: Dict[str, List[float]]
+    ) -> List[float]:
         return assigned_value[row_number]
 
     nodes["X"] = nodes["agent"].apply(set_value, args=(x_coords,))
     nodes["Y"] = nodes["agent"].apply(set_value, args=(y_coords,))
     global range_color
-    range_color = [float(nodes[metric].min()), float(nodes[metric].max())]
+    range_color: List[float, float] = [
+        float(nodes[metric].min()),
+        float(nodes[metric].max()),
+    ]
     nodes["size"] = [35 for x in range(len(nodes))]
 
     # CREATE NODES PLOT
 
-    nodes_plot = px.scatter(
+    nodes_plot: Figure = px.scatter(
         nodes,
         x="X",
         y="Y",
@@ -100,7 +120,7 @@ def create_nodes_plot(inference, x_coords, y_coords):
 
     nodes_plot.update_traces(config.plots["network"]["nodes"]["traces"])
 
-    i = config.plots["network"]["nodes"]["other"]["border"]
+    i: float = config.plots["network"]["nodes"]["other"]["border"]
     nodes_plot.update_xaxes(range=[xmin - i, xmax + i])
     nodes_plot.update_yaxes(range=[ymin - i, ymax + i])
 
@@ -117,9 +137,13 @@ def create_nodes_plot(inference, x_coords, y_coords):
     return nodes_plot
 
 
-def create_edges_plot(messages, x_coords, y_coords):
+def create_edges_plot(
+    messages: DataFrame,
+    x_coords: Dict[str : npt.NDArray[np.float64]],
+    y_coords: Dict[str : npt.NDArray[np.float64]],
+) -> Figure:
     # EDGES DF
-    edges = messages.copy()
+    edges: DataFrame = messages.copy()
     edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
         edges.type == msg_type
     ]
@@ -131,15 +155,15 @@ def create_edges_plot(messages, x_coords, y_coords):
     edges["timestamp"] = pd.to_datetime(edges.timestamp)
     edges["timestamp"] = edges.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
     edges["timestamp"] = pd.to_datetime(edges.timestamp)
-    first_date = edges.timestamp.min()
+    first_date: Timestamp = edges.timestamp.min()
     edges["timestamp"] = edges.timestamp.apply(
         lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
     )
 
     ## CONVERT TO PANEL DATA
-    keep = edges.groupby(["timestamp", "edge"])["timestamp"].idxmax()
-    edges = edges.loc[keep]
-    mux = pd.MultiIndex.from_product(
+    keep: DataFrame = edges.groupby(["timestamp", "edge"])["timestamp"].idxmax()
+    edges: DataFrame = edges.loc[keep]
+    mux: DataFrame = pd.MultiIndex.from_product(
         [edges["timestamp"].unique(), np.array(edges.edge.unique())],
         names=["timestamp", "edge"],
     )
@@ -149,7 +173,9 @@ def create_edges_plot(messages, x_coords, y_coords):
     edges = edges.fillna(0)
 
     ## LAST EDGE TRANSFORMATIONS
-    def set_value(row_number, assigned_value):
+    def set_value(
+        row_number: str, assigned_value: Dict[str, List[float]]
+    ) -> List[float]:
         return assigned_value[row_number]
 
     edges["sender"] = list(map(lambda x: x[0], edges.edge))
@@ -167,26 +193,26 @@ def create_edges_plot(messages, x_coords, y_coords):
     edges = edges.drop(["sender", "to", "X_sender", "Y_sender", "X_to", "Y_to"], axis=1)
 
     # CREATE EDGES PLOT
-    def new_value(value):
-        OldMin = edges.weight.min()
-        OldMax = edges.weight.max()
-        OldRange = OldMax - OldMin
-        NewMin = 0
-        NewMax = config.plots["network"]["edges"]["other"]["max_size_lines"]
-        NewRange = NewMax - NewMin
+    def new_value(value: int) -> int:
+        OldMin: int = edges.weight.min()
+        OldMax: int = edges.weight.max()
+        OldRange: int = OldMax - OldMin
+        NewMin: int = 0
+        NewMax: int = config.plots["network"]["edges"]["other"]["max_size_lines"]
+        NewRange: int = NewMax - NewMin
         return round((((value - OldMin) * NewRange) / OldRange) + NewMin)
 
-    edges_plot = go.Figure()
-    links = edges.edge.unique()
-    times = edges.timestamp.unique()
+    edges_plot: Figure = go.Figure()
+    links: List[str] = edges.edge.unique()
+    times: List[Timestamp] = edges.timestamp.unique()
     # TRACES
     for link in links:
-        x = edges[(edges.edge == link)].head(1).X.values[0]
-        y = edges[(edges.edge == link)].head(1).Y.values[0]
+        x: List[float] = edges[(edges.edge == link)].head(1).X.values[0]
+        y: List[float] = edges[(edges.edge == link)].head(1).Y.values[0]
         edges_plot.add_scatter(x=x, y=y, name=str(link), mode="lines", line_width=1)
 
     # SLIDER
-    sliders_dict = {
+    sliders_dict: Dict = {
         "active": 0,
         "yanchor": "top",
         "xanchor": "left",
@@ -209,7 +235,7 @@ def create_edges_plot(messages, x_coords, y_coords):
     for time in times:
         data = []
         for link in links:
-            row = edges[(edges.edge == link) & (edges.timestamp == time)]
+            row: DataFrame = edges[(edges.edge == link) & (edges.timestamp == time)]
             data.append(
                 go.Scatter(
                     x=row.X.values[0],
@@ -222,7 +248,7 @@ def create_edges_plot(messages, x_coords, y_coords):
         frames.append(
             go.Frame(data=data, traces=list(range(len(links))), name=str(time))
         )
-        slider_step = {
+        slider_step: Dict[str, List] = {
             "args": [
                 [str(time)],
                 {
@@ -240,7 +266,7 @@ def create_edges_plot(messages, x_coords, y_coords):
         sliders_dict["steps"].append(slider_step)
 
     edges_plot.update(frames=frames)
-    updatemenus = [
+    updatemenus: List[Dict] = [
         dict(
             buttons=[
                 dict(
@@ -291,7 +317,7 @@ def create_edges_plot(messages, x_coords, y_coords):
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
 
-    i = config.plots["network"]["edges"]["other"]["border"]
+    i: float = config.plots["network"]["edges"]["other"]["border"]
     edges_plot.update_xaxes(range=[xmin - i, xmax + i])
     edges_plot.update_yaxes(range=[ymin - i, ymax + i])
 
@@ -303,9 +329,14 @@ def create_edges_plot(messages, x_coords, y_coords):
     return edges_plot
 
 
-def create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords):
+def create_combined_plot(
+    nodes_plot: Figure,
+    edges_plot: Figure,
+    x_coords: Dict[str : npt.NDArray[np.float64]],
+    y_coords: Dict[str : npt.NDArray[np.float64]],
+) -> Figure:
     # Stationary combined plot
-    combined_plot = go.Figure(
+    combined_plot: Figure = go.Figure(
         data=edges_plot.data + nodes_plot.data,
         frames=[
             go.Frame(data=edges_plot.data + nodes_plot.data, name=nodes_plot.name)
@@ -328,7 +359,7 @@ def create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords):
     )
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
-    i = 0.12
+    i: float = 0.12
     combined_plot.update_xaxes(range=[xmin - i, xmax + i])
     combined_plot.update_yaxes(range=[ymin - i, ymax + i])
 
@@ -336,17 +367,19 @@ def create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords):
     return combined_plot
 
 
-def generate(config, download=False):
-    messages = pd.read_csv(config.experiment_path / r"message.csv")
-    inference = pd.read_csv(config.experiment_path / r"nn_inference.csv")
+def generate(config: Config, download: bool = False) -> list[str] | None:
+    messages: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
+    inference: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
     global metric
-    metric = "test_accuracy"
+    metric: str = "test_accuracy"
     global msg_type
-    msg_type = "SEND-LAYERS"
+    msg_type: str = "SEND-LAYERS"
     x_coords, y_coords = create_coordinates(messages)
-    nodes_plot = create_nodes_plot(inference, x_coords, y_coords)
-    edges_plot = create_edges_plot(messages, x_coords, y_coords)
-    combined_plot = create_combined_plot(nodes_plot, edges_plot, x_coords, y_coords)
+    nodes_plot: Figure = create_nodes_plot(inference, x_coords, y_coords)
+    edges_plot: Figure = create_edges_plot(messages, x_coords, y_coords)
+    combined_plot: Figure = create_combined_plot(
+        nodes_plot, edges_plot, x_coords, y_coords
+    )
 
-    figs = [combined_plot, nodes_plot, edges_plot]
+    figs: List[Figure] = [combined_plot, nodes_plot, edges_plot]
     return save_or_print_figures(download, figs)

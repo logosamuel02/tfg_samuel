@@ -2,17 +2,19 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-
+from pandas.core.frame import DataFrame
+from plotly.graph_objects import Figure
+from typing import List
 from config import Config, clean, save_or_print_figures
 
 config = Config()
 
 
-def train_by_agent(train):
-    metrics = ["accuracy", "loss", "precision", "recall", "f1_score"]
+def train_by_agent(train: DataFrame) -> List[Figure]:
+    metrics: List[str] = ["accuracy", "loss", "precision", "recall", "f1_score"]
     figs = []
     for metric in metrics:
-        fig = px.line(
+        fig: Figure = px.line(
             train,
             x="algorithm_round",
             y=metric,
@@ -29,8 +31,8 @@ def train_by_agent(train):
     return figs
 
 
-def test_by_agent(test):
-    metrics = [
+def test_by_agent(test: DataFrame) -> List[Figure]:
+    metrics: List[str] = [
         "test_accuracy",
         "test_loss",
         "test_precision",
@@ -39,7 +41,7 @@ def test_by_agent(test):
     ]
     figs = []
     for metric in metrics:
-        fig = px.line(
+        fig: Figure = px.line(
             test,
             x="algorithm_round",
             y=metric,
@@ -56,12 +58,12 @@ def test_by_agent(test):
     return figs
 
 
-def train_test_network(train, test):
-    metrics = metrics = ["accuracy", "loss", "precision", "recall", "f1_score"]
+def train_test_network(train: DataFrame, test: DataFrame) -> List[Figure]:
+    metrics: List[str] = ["accuracy", "loss", "precision", "recall", "f1_score"]
     figs = []
     for metric in metrics:
 
-        g_train = (
+        g_train: DataFrame = (
             train.groupby(["algorithm_round"])
             .agg(
                 maximum_accuracy=(metric, "max"),
@@ -70,7 +72,7 @@ def train_test_network(train, test):
             )
             .reset_index()
         )
-        g_test = (
+        g_test: DataFrame = (
             test.groupby(["algorithm_round"])
             .agg(
                 maximum_accuracy=(f"test_{metric}", "max"),
@@ -80,18 +82,18 @@ def train_test_network(train, test):
             .reset_index()
         )
 
-        x = list(g_test.algorithm_round.unique())
-        x_rev = x[::-1]
+        x: List[int] = list(g_test.algorithm_round.unique())
+        x_rev: List[int] = x[::-1]
 
-        nmax = g_train.maximum_accuracy.to_list()
-        nmin = g_train.minimum_accuracy.to_list()
+        nmax: List[float] = g_train.maximum_accuracy.to_list()
+        nmin: List[float] = g_train.minimum_accuracy.to_list()
         nmin = nmin[::-1]
 
-        tmax = g_test.maximum_accuracy.to_list()
-        tmin = g_test.minimum_accuracy.to_list()
+        tmax: List[float] = g_test.maximum_accuracy.to_list()
+        tmin: List[float] = g_test.minimum_accuracy.to_list()
         tmin = tmin[::-1]
 
-        fig = go.Figure()
+        fig: Figure = go.Figure()
 
         fig.add_trace(
             go.Scatter(
@@ -156,11 +158,11 @@ def train_test_network(train, test):
     return figs
 
 
-def generate(config, download=False):
-    train = pd.read_csv(config.experiment_path / r"nn_train.csv")
-    test = pd.read_csv(config.experiment_path / r"nn_inference.csv")
-    f1 = train_by_agent(train)
-    f2 = test_by_agent(test)
-    f3 = train_test_network(train, test)
-    figs = f1 + f2 + f3
+def generate(config: Config, download: bool = False) -> list[str] | None:
+    train: DataFrame = pd.read_csv(config.experiment_path / r"nn_train.csv")
+    test: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
+    f1: List[Figure] = train_by_agent(train)
+    f2: List[Figure] = test_by_agent(test)
+    f3: List[Figure] = train_test_network(train, test)
+    figs: List[Figure] = f1 + f2 + f3
     return save_or_print_figures(download, figs)

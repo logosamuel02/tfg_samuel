@@ -1,3 +1,8 @@
+from pandas.core.frame import DataFrame
+from plotly.graph_objects import Figure
+from typing import List
+
+from config import Config
 import anova
 import algorithm
 import data_split
@@ -7,7 +12,7 @@ import inference
 import network
 
 
-html = """
+html: str = """
 <span style='font-family:"Arial Black";font-size:35px;'>
 <span style='color:#FF0505;'>A</span><span style='color:#FE1304;'>l</span>
 <span style='color:#FD2204;'>l</span> <span style='color:#FB3F03;'>i</span>
@@ -28,7 +33,7 @@ html = """
 """
 
 
-def download(config):
+def download(config: Config) -> str:
     anova.generate(config=config, download=True)
     print("Anova finished")
     algorithm.generate(config=config, download=True)

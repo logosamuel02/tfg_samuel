@@ -22,7 +22,7 @@ config = Config()
 
 
 async def SETTINGS(request):
-    return {"figures": anova.generate(config=config, download=False)}
+    return {"figures": page}
 
 
 async def ANOVA(request):
@@ -95,8 +95,8 @@ async def main():
 
     dummy.web.add_get(
         "/manager/plots/settings",
-        ANOVA,
-        template="plots.html",
+        SETTINGS,
+        template="plots_settings.html",
     )
     dummy.web.add_get(
         "/manager/plots/anova",
@@ -106,37 +106,37 @@ async def main():
     dummy.web.add_get(
         "/manager/plots/algorithm",
         ALGORITHM,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/data_split",
         DATA_SPLIT,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/messages",
         MESSAGES,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/convergence",
         CONVERGENCE,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/inference",
         INFERENCE,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/network",
         NETWORK,
-        template="template2.html",
+        template="plots.html",
     )
     dummy.web.add_get(
         "/manager/plots/download",
         DOWNLOAD,
-        template="template2.html",
+        template="plots.html",
     )
     await dummy.start(auto_register=True)
     dummy.web.start(hostname="localhost", port="10000")
