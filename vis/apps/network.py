@@ -22,7 +22,9 @@ def create_coordinates(
 ) -> List[Dict[str : npt.NDArray[np.float64]]]:
     # CONVERT DATA
     messages_mod: DataFrame = messages.copy()
-    messages_mod = messages_mod[["sender", "to"]][(messages_mod.algorithm_round <= 100)]
+    messages_mod = messages_mod[
+        ["sender", "to"]
+    ]  # [(messages_mod.algorithm_round <= 100)
     messages_mod.sender = messages_mod.sender.apply(lambda x: x.split("@")[0])
     messages_mod.to = messages_mod.to.apply(lambda x: x.split("@")[0])
 
