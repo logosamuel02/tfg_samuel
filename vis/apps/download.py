@@ -1,7 +1,3 @@
-from pandas.core.frame import DataFrame
-from plotly.graph_objects import Figure
-from typing import List
-
 from config import Config
 import anova
 import algorithm
