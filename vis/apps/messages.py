@@ -5,7 +5,7 @@ from pandas.core.frame import DataFrame
 from pandas._libs.tslibs.timestamps import Timestamp
 from plotly.graph_objects import Figure
 from typing import List
-from config import Config, save_or_print_figures
+from config import Config, clean, save_or_print_figures
 
 config = Config()
 
@@ -60,16 +60,22 @@ def statistics_messages(data: DataFrame) -> Figure:
         data.groupby("type")
         .agg(
             number_of_messages=("size", "count"),
-            total_size=("size", "sum"),
-            average_size=("size", "mean"),
-            standard_deviation=("size", "std"),
-            minimum_size=("size", "min"),
-            maximum_size=("size", "max"),
+            total_size_kB=("size", "sum"),
+            average_size_kb=("size", "mean"),
+            standard_deviation_kb=("size", "std"),
+            minimum_size_kb=("size", "min"),
+            maximum_size_kb=("size", "max"),
         )
-        .reset_index()
         .round(2)
+        .reset_index()
     )
-    fig: Figure = ff.create_table(stats)
+    stats.loc[:, ~stats.columns.isin(["number_of_messages", "type"])] = (
+        stats.loc[:, ~stats.columns.isin(["number_of_messages", "type"])] / 1024
+    ).round(2)
+    # stats["number_of_messages"] = stats["number_of_messages"] * 1024
+    stats_c: DataFrame = stats.copy()
+    stats_c.columns = [clean(var) for var in stats_c.columns]
+    fig: Figure = ff.create_table(stats_c)
     fig.update_layout(config.plots["messages"]["table_msg"]["layout"])
     return fig
 
@@ -140,4 +146,4 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     f5: Figure = distribution_info(dist_data)
     f6: Figure = distribution_info_type(dist_data)
     figs: List[Figure] = [f0, f1, f2, f3, f4, f5, f6]
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

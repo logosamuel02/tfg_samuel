@@ -29,19 +29,37 @@ html: str = """
 """
 
 
-def download(config: Config) -> str:
-    anova.generate(config=config, download=True)
+def download_svg(config: Config) -> str:
+    anova.generate(config=config, download="svg")
     print("Anova finished")
-    algorithm.generate(config=config, download=True)
+    algorithm.generate(config=config, download="svg")
     print("Algorithm finished")
-    data_split.generate(config=config, download=True)
+    data_split.generate(config=config, download="svg")
     print("Data split finished")
-    messages.generate(config=config, download=True)
+    messages.generate(config=config, download="svg")
     print("Messages finished")
-    convergence.generate(config=config, download=True)
+    convergence.generate(config=config, download="svg")
     print("Convergence finished")
-    inference.generate(config=config, download=True)
+    inference.generate(config=config, download="svg")
     print("Inference finished")
-    network.generate(config=config, download=True)
+    network.generate(config=config, download="svg")
+    print("Network finished")
+    return html
+
+
+def download_gif(config: Config) -> str:
+    anova.generate(config=config, download="gif")
+    print("Anova finished")
+    algorithm.generate(config=config, download="gif")
+    print("Algorithm finished")
+    data_split.generate(config=config, download="gif")
+    print("Data split finished")
+    messages.generate(config=config, download="gif")
+    print("Messages finished")
+    convergence.generate(config=config, download="gif")
+    print("Convergence finished")
+    inference.generate(config=config, download="gif")
+    print("Inference finished")
+    network.generate(config=config, download="gif")
     print("Network finished")
     return html

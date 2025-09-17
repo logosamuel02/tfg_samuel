@@ -53,8 +53,12 @@ async def NETWORK(request):
     return {"figures": network.generate(config=config, download=False)}
 
 
-async def DOWNLOAD(request):
-    return {"figures": download.download(config=config)}
+async def DOWNLOAD_SVG(request):
+    return {"figures": download.download_svg(config=config)}
+
+
+async def DOWNLOAD_GIF(request):
+    return {"figures": download.download_gif(config=config)}
 
 
 class DummyAgent(Agent):
@@ -91,7 +95,12 @@ async def main():
     )
     dummy.web.add_menu_entry("Inference", "/manager/plots/inference", "fa fa-forward")
     dummy.web.add_menu_entry("Network", "/manager/plots/network", "fa fa-sitemap")
-    dummy.web.add_menu_entry("Download", "/manager/plots/download", "fa fa-arrow-down")
+    dummy.web.add_menu_entry(
+        "Download SVG", "/manager/plots/download_svg", "fa fa-arrow-down"
+    )
+    dummy.web.add_menu_entry(
+        "Download GIF", "/manager/plots/download_gif", "fa fa-arrow-down"
+    )
 
     dummy.web.add_get(
         "/manager/plots/settings",
@@ -134,8 +143,13 @@ async def main():
         template="plots.html",
     )
     dummy.web.add_get(
-        "/manager/plots/download",
-        DOWNLOAD,
+        "/manager/plots/download_svg",
+        DOWNLOAD_SVG,
+        template="plots.html",
+    )
+    dummy.web.add_get(
+        "/manager/plots/download_gif",
+        DOWNLOAD_GIF,
         template="plots.html",
     )
     await dummy.start(auto_register=True)

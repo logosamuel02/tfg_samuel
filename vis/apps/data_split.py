@@ -129,4 +129,4 @@ def create_bubble_plots(data: DataFrame) -> List[Figure]:
 def generate(config: Config, download: bool = False) -> list[str] | None:
     data: DataFrame = pd.read_csv(config.experiment_path / r"data_split.csv")
     figs: List[Figure] = create_bubble_plots(data)
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

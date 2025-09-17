@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 
 def create_coordinates(
     messages: DataFrame,
-) -> List[Dict[str : npt.NDArray[np.float64]]]:
+):
     # CONVERT DATA
     messages_mod: DataFrame = messages.copy()
     messages_mod = messages_mod[
@@ -57,11 +57,27 @@ def create_coordinates(
     return x_dictionary, y_dictionary
 
 
-def create_nodes_plot(
-    inference: DataFrame,
-    x_coords: Dict[str : npt.NDArray[np.float64]],
-    y_coords: Dict[str : npt.NDArray[np.float64]],
-) -> Figure:
+def create_edges_df(messages: DataFrame) -> DataFrame:
+    edges: DataFrame = messages.copy()
+    edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
+        edges.type == msg_type
+    ]
+    edges[["sender", "domain"]] = edges.sender.str.split("@", expand=True)
+    edges[["to", "domain2"]] = edges.to.str.split("@", expand=True)
+    edges = edges.drop(["domain", "domain2", "algorithm_round"], axis=1)
+    edges["edge"] = list(map(lambda x: tuple(sorted(x)), zip(edges.sender, edges.to)))
+    edges["weight"] = edges.groupby(["edge"]).cumcount().add(1)
+    edges["timestamp"] = pd.to_datetime(edges.timestamp)
+    edges["timestamp"] = edges.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
+    edges["timestamp"] = pd.to_datetime(edges.timestamp)
+    first_date: Timestamp = edges.timestamp.min()
+    edges["timestamp"] = edges.timestamp.apply(
+        lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
+    )
+    return edges
+
+
+def create_nodes_df(inference: DataFrame) -> DataFrame:
     nodes: DataFrame = inference.copy()
     nodes = nodes[["agent", "timestamp", metric]]
 
@@ -72,10 +88,19 @@ def create_nodes_plot(
     nodes["timestamp"] = nodes.timestamp.apply(
         lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
     )
+    return nodes
+
+
+def create_nodes_plot(
+    nodes: DataFrame,
+    timestamps: List[float],
+    x_coords,
+    y_coords,
+) -> Figure:
     ## CONVERT TO PANEL DATA
     nodes["agent_id"] = nodes.groupby(nodes.columns.tolist(), sort=False).ngroup() + 1
     mux: DataFrame = pd.MultiIndex.from_product(
-        [nodes["timestamp"].unique(), np.array(nodes.agent.unique())],
+        [timestamps, np.array(nodes.agent.unique())],
         names=["timestamp", "agent"],
     )
 
@@ -92,7 +117,7 @@ def create_nodes_plot(
     nodes["X"] = nodes["agent"].apply(set_value, args=(x_coords,))
     nodes["Y"] = nodes["agent"].apply(set_value, args=(y_coords,))
     global range_color
-    range_color: List[float, float] = [
+    range_color = [
         float(nodes[metric].min()),
         float(nodes[metric].max()),
     ]
@@ -139,33 +164,16 @@ def create_nodes_plot(
 
 
 def create_edges_plot(
-    messages: DataFrame,
-    x_coords: Dict[str : npt.NDArray[np.float64]],
-    y_coords: Dict[str : npt.NDArray[np.float64]],
+    edges: DataFrame,
+    timestamps: List[float],
+    x_coords,
+    y_coords,
 ) -> Figure:
-    # EDGES DF
-    edges: DataFrame = messages.copy()
-    edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
-        edges.type == msg_type
-    ]
-    edges[["sender", "domain"]] = edges.sender.str.split("@", expand=True)
-    edges[["to", "domain2"]] = edges.to.str.split("@", expand=True)
-    edges = edges.drop(["domain", "domain2", "algorithm_round"], axis=1)
-    edges["edge"] = list(map(lambda x: tuple(sorted(x)), zip(edges.sender, edges.to)))
-    edges["weight"] = edges.groupby(["edge"]).cumcount().add(1)
-    edges["timestamp"] = pd.to_datetime(edges.timestamp)
-    edges["timestamp"] = edges.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
-    edges["timestamp"] = pd.to_datetime(edges.timestamp)
-    first_date: Timestamp = edges.timestamp.min()
-    edges["timestamp"] = edges.timestamp.apply(
-        lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
-    )
-
     ## CONVERT TO PANEL DATA
     keep: DataFrame = edges.groupby(["timestamp", "edge"])["timestamp"].idxmax()
     edges: DataFrame = edges.loc[keep]
     mux: DataFrame = pd.MultiIndex.from_product(
-        [edges["timestamp"].unique(), np.array(edges.edge.unique())],
+        [timestamps, np.array(edges.edge.unique())],
         names=["timestamp", "edge"],
     )
     edges = edges.set_index(["timestamp", "edge"]).reindex(mux).reset_index()
@@ -333,8 +341,8 @@ def create_edges_plot(
 def create_combined_plot(
     nodes_plot: Figure,
     edges_plot: Figure,
-    x_coords: Dict[str : npt.NDArray[np.float64]],
-    y_coords: Dict[str : npt.NDArray[np.float64]],
+    x_coords,
+    y_coords,
 ) -> Figure:
     # Stationary combined plot
     combined_plot: Figure = go.Figure(
@@ -372,15 +380,20 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     messages: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
     inference: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
     global metric
-    metric: str = "test_accuracy"
+    metric = "test_accuracy"
     global msg_type
-    msg_type: str = "SEND-LAYERS"
+    msg_type = "SEND-LAYERS"
     x_coords, y_coords = create_coordinates(messages)
-    nodes_plot: Figure = create_nodes_plot(inference, x_coords, y_coords)
-    edges_plot: Figure = create_edges_plot(messages, x_coords, y_coords)
+    nodes = create_nodes_df(inference)
+    edges = create_edges_df(messages)
+    timestamps: List[float] = sorted(
+        list(set(nodes.timestamp.to_list() + edges.timestamp.to_list()))
+    )
+    nodes_plot: Figure = create_nodes_plot(nodes, timestamps, x_coords, y_coords)
+    edges_plot: Figure = create_edges_plot(edges, timestamps, x_coords, y_coords)
     combined_plot: Figure = create_combined_plot(
         nodes_plot, edges_plot, x_coords, y_coords
     )
 
     figs: List[Figure] = [combined_plot, nodes_plot, edges_plot]
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

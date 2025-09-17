@@ -90,7 +90,7 @@ def create_df(config: Config) -> DataFrame:
 def create_atable(df: DataFrame) -> DataFrame:
     atable: DataFrame = (
         df.groupby(["distribution", "ann"])
-        .agg(max_acc=("maximum_accuracy_achieved", "max"))
+        .agg(maximum_accuracy=("maximum_accuracy_achieved", "max"))
         .reset_index()
     )
     return atable
@@ -110,14 +110,14 @@ def create_interaction_plot(atable: DataFrame, var1: str, var2: str) -> Figure:
     fig: Figure = px.scatter(
         atable,
         x=var1,
-        y="max_acc",
+        y="maximum_accuracy",
         color=var2,
     ).update_traces(mode="lines+markers")
     fig.update_layout(title_text=f"Interaction between {clean(var1)} and {clean(var2)}")
     fig.update_layout(config.plots["anova"]["interaction"]["layout"])
     fig.update_layout(
         xaxis_title_text=config.variables[var1]["legend"],
-        yaxis_title_text=config.variables["max_acc"]["legend"],
+        yaxis_title_text=config.variables["maximum_accuracy"]["legend"],
         legend_title_text=config.variables[var2]["legend"],
     )
     return fig
@@ -227,4 +227,4 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     manova: MultivariateTestResults = create_manova(data)
     f7: List[Figure] = create_manova_figs(manova, "distribution")
     figs: List[Figure] = [f1] + f2 + [f3, f4, f5, f6] + f7
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

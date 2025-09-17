@@ -226,6 +226,10 @@
     "timestamp_minutes": {
         "legend": "Execution time in minutes",
         "description": "Execution time in minutes"
+    },
+    "maximum_accuracy": {
+        "legend": "Maximum Accuracy",
+        "description": "Maximum Accuracy"
     }
     
 

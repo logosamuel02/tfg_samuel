@@ -97,4 +97,4 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     f1: Figure = violin_plot(data)
     f2: Figure = execution_time_plot(data)
     figs: List[Figure] = [f1, f2]
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

@@ -16,7 +16,7 @@ def create_df(config: Config) -> DataFrame:
     lst: List[str] = df.layer.unique()
     split_layer_str = lambda x: x.split(".")[0]
     global layers_opts
-    layers_opts: Dict[str, List[str]] = {
+    layers_opts = {
         split_layer_str(k): list(g)
         for k, g in groupby(sorted(lst, key=split_layer_str), key=split_layer_str)
     }
@@ -155,20 +155,20 @@ def create_combined_plot(
 
 def set_globals_layer(data: DataFrame, layer: str) -> None:
     global min_x
-    min_x: float = data[layers_opts[layer][0]].min()
+    min_x = data[layers_opts[layer][0]].min()
     global min_y
-    min_y: float = data[layers_opts[layer][1]].min()
+    min_y = data[layers_opts[layer][1]].min()
     global max_x
-    max_x: float = data[layers_opts[layer][0]].max()
+    max_x = data[layers_opts[layer][0]].max()
     global max_y
-    max_y: float = data[layers_opts[layer][1]].max()
+    max_y = data[layers_opts[layer][1]].max()
 
 
 def set_globals_sublayer(data: DataFrame, layer: str, index: int) -> None:
     global min_x
-    min_x: float = data[layers_opts[layer][index]].min()
+    min_x = data[layers_opts[layer][index]].min()
     global max_x
-    max_x: float = data[layers_opts[layer][index]].max()
+    max_x = data[layers_opts[layer][index]].max()
 
 
 def generate(config: Config, download: bool = False) -> list[str] | None:
@@ -187,4 +187,4 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
             )
             figs.append(combined_plot)
         print(f"Created plots for {layer.upper()} layer")
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

@@ -164,4 +164,4 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     f2: List[Figure] = test_by_agent(test)
     f3: List[Figure] = train_test_network(train, test)
     figs: List[Figure] = f1 + f2 + f3
-    return save_or_print_figures(download, figs)
+    return save_or_print_figures(download, figs, __name__)

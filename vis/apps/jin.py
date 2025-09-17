@@ -24,4 +24,8 @@ def render(template):
 
 
 if __name__ == "__main__":
-    print(render(template="prueba.html"))
+    # print(render(template="prueba.html"))
+    from pathlib import Path
+
+    file = Path(__file__).name
+    print(file)
