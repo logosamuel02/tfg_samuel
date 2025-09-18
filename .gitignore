@@ -5,6 +5,7 @@ logs/
 *venv/
 xperiments/
 images/
+figures/
 notebooks/
 nacio/
 dbs/

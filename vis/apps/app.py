@@ -16,7 +16,7 @@ import network
 import download
 from settings import page
 
-from config import Config
+from config import Config, get_module_figures
 
 config = Config()
 
@@ -26,31 +26,31 @@ async def SETTINGS(request):
 
 
 async def ANOVA(request):
-    return {"figures": anova.generate(config=config, download=False)}
+    return {"figures": get_module_figures("anova.py")}
 
 
 async def ALGORITHM(request):
-    return {"figures": algorithm.generate(config=config, download=False)}
+    return {"figures": get_module_figures("algorithm.py")}
 
 
 async def DATA_SPLIT(request):
-    return {"figures": data_split.generate(config=config, download=False)}
+    return {"figures": get_module_figures("data_split.py")}
 
 
 async def MESSAGES(request):
-    return {"figures": messages.generate(config=config, download=False)}
+    return {"figures": get_module_figures("messages.py")}
 
 
 async def CONVERGENCE(request):
-    return {"figures": convergence.generate(config=config, download=False)}
+    return {"figures": get_module_figures("convergence.py")}
 
 
 async def INFERENCE(request):
-    return {"figures": inference.generate(config=config, download=False)}
+    return {"figures": get_module_figures("inference.py")}
 
 
 async def NETWORK(request):
-    return {"figures": network.generate(config=config, download=False)}
+    return {"figures": get_module_figures("network.py")}
 
 
 async def DOWNLOAD_SVG(request):
@@ -59,6 +59,11 @@ async def DOWNLOAD_SVG(request):
 
 async def DOWNLOAD_GIF(request):
     return {"figures": download.download_gif(config=config)}
+
+
+async def GEN_ANOVA(request):
+    figs = anova.generate(config)
+    return {"figures": figs}
 
 
 class DummyAgent(Agent):
@@ -87,6 +92,7 @@ async def main():
 
     dummy.web.add_menu_entry("Settings", "/manager/plots/settings", "fa fa-sliders")
     dummy.web.add_menu_entry("Anova", "/manager/plots/anova", "fa fa-bolt")
+    dummy.web.add_menu_entry("GEN Anova", "/manager/plots/gen_anova", "fa fa-bolt")
     dummy.web.add_menu_entry("Algorithm", "/manager/plots/algorithm", "fa fa-rocket")
     dummy.web.add_menu_entry("Data Split", "/manager/plots/data_split", "fa fa-bomb")
     dummy.web.add_menu_entry("Messages", "/manager/plots/messages", "fa fa-comments")
@@ -103,6 +109,11 @@ async def main():
     )
 
     dummy.web.add_get(
+        "/gen_anova",
+        GEN_ANOVA,
+        template="plots.html",
+    )
+    dummy.web.add_get(
         "/manager/plots/settings",
         SETTINGS,
         template="plots_settings.html",
@@ -110,6 +121,11 @@ async def main():
     dummy.web.add_get(
         "/manager/plots/anova",
         ANOVA,
+        template="plots.html",
+    )
+    dummy.web.add_get(
+        "/manager/plots/gen_anova",
+        GEN_ANOVA,
         template="plots.html",
     )
     dummy.web.add_get(

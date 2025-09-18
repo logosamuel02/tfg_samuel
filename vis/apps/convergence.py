@@ -6,7 +6,7 @@ import numpy as np
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List, Dict
-from config import Config, clean, save_or_print_figures
+from config import Config, clean
 
 config = Config()
 
@@ -187,4 +187,3 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
             )
             figs.append(combined_plot)
         print(f"Created plots for {layer.upper()} layer")
-    return save_or_print_figures(download, figs, __name__)

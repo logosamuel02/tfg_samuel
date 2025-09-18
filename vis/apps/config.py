@@ -1,6 +1,7 @@
 import os
 import json
 from plotly.graph_objects import Figure
+import plotly.io as pio
 from pydantic import BaseModel, DirectoryPath
 from dotenv import load_dotenv
 from typing import List, Dict
@@ -18,26 +19,55 @@ def clean(var: str) -> str:
     return var.capitalize()
 
 
-def save_or_print_figures(
-    download: bool, figs: List[Figure], module: str
-) -> List[str] | None:
-    root: str = "images"
-    folder: str = f"{root}/{module.split('.')[0]}"
-    isExist: bool = os.path.exists(folder)
-    if not isExist:
-        os.makedirs(folder)
+def load_figure(filename: str):
+    return pio.read_json(filename)
+
+
+def load_module_figures(module: str):
+    root_fig: str = "figures"
+    figures_folder: str = rf"{root_fig}/{module.split('.')[0]}"
+    isExistFig: bool = os.path.exists(figures_folder)
+    if not isExistFig:
+        os.makedirs(figures_folder)
+    return [
+        load_figure(rf"{x}")
+        for x in Path(figures_folder).iterdir()
+        if x.suffix == ".json"
+    ]
+
+
+def get_module_figures(module: str):
+    figs: list[Figure] = load_module_figures(module)
+    html_tuples = []
+    for fig in figs:
+        title: str = fig.layout.title.text
+        html_fig: str = fig.to_html(full_html=False)
+        html_fig = html_fig.replace("PNG", "SVG", 1)
+        html_fig = html_fig.replace("png", "svg", 3)
+        html_tuples.append([title, html_fig])
+    return html_tuples
+
+
+def download_figures(download: str, module: str) -> List[str] | None:
+    figs = load_module_figures(module)
+    root_img: str = "images"
+    img_folder: str = rf"{root_img}/{module.split('.')[0]}"
+    isExistImg: bool = os.path.exists(img_folder)
+    if not isExistImg:
+        os.makedirs(img_folder)
+
     if download == "svg":
         for i, F in enumerate(figs):
             if len(F.frames) > 0:
                 frame = F.frames[-1]
                 F.update(data=frame.data)
                 F.layout.sliders[0].update(active=len(F.frames) - 1)
-            F.write_image(rf"{folder}/{F.layout.title.text.replace(' ', '_')}.svg")
+            F.write_image(rf"{img_folder}/{F.layout.title.text.replace(' ', '_')}.svg")
 
     elif download == "gif":
         for F in figs:
             if len(F.frames) > 0:
-                filename = rf"{folder}/{F.layout.title.text.replace(' ', '_')}.gif"
+                filename = rf"{img_folder}/{F.layout.title.text.replace(' ', '_')}.gif"
                 frames = []
                 frame_duration: int = config.gif["frame_duration"]
                 n_frames_by_plot: int = config.gif["n_of_frames"]
@@ -62,15 +92,6 @@ def save_or_print_figures(
                     duration=frame_duration,
                     loop=0,
                 )
-    else:
-        updated_figs: List = []
-        for F in figs:
-            title: str = F.layout.title.text
-            html_fig: str = F.to_html(full_html=False)
-            html_fig = html_fig.replace("PNG", "SVG", 1)
-            html_fig = html_fig.replace("png", "svg", 3)
-            updated_figs.append([title, html_fig])
-        return updated_figs
 
 
 class Config(BaseModel):

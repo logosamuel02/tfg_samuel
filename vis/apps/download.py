@@ -1,4 +1,4 @@
-from config import Config
+from config import Config, download_figures
 import anova
 import algorithm
 import data_split
@@ -30,36 +30,36 @@ html: str = """
 
 
 def download_svg(config: Config) -> str:
-    anova.generate(config=config, download="svg")
+    download_figures(download="svg", module="anova.py")
     print("Anova finished")
-    algorithm.generate(config=config, download="svg")
-    print("Algorithm finished")
-    data_split.generate(config=config, download="svg")
-    print("Data split finished")
-    messages.generate(config=config, download="svg")
-    print("Messages finished")
-    convergence.generate(config=config, download="svg")
-    print("Convergence finished")
-    inference.generate(config=config, download="svg")
-    print("Inference finished")
-    network.generate(config=config, download="svg")
-    print("Network finished")
-    return html
+    # algorithm.generate(config=config, download="svg")
+    # print("Algorithm finished")
+    # data_split.generate(config=config, download="svg")
+    # print("Data split finished")
+    # messages.generate(config=config, download="svg")
+    # print("Messages finished")
+    # convergence.generate(config=config, download="svg")
+    # print("Convergence finished")
+    # inference.generate(config=config, download="svg")
+    # print("Inference finished")
+    # network.generate(config=config, download="svg")
+    # print("Network finished")
+    return [["Downloaded", html]]
 
 
 def download_gif(config: Config) -> str:
     anova.generate(config=config, download="gif")
     print("Anova finished")
-    algorithm.generate(config=config, download="gif")
-    print("Algorithm finished")
-    data_split.generate(config=config, download="gif")
-    print("Data split finished")
-    messages.generate(config=config, download="gif")
-    print("Messages finished")
-    convergence.generate(config=config, download="gif")
-    print("Convergence finished")
-    inference.generate(config=config, download="gif")
-    print("Inference finished")
-    network.generate(config=config, download="gif")
-    print("Network finished")
+    # algorithm.generate(config=config, download="gif")
+    # print("Algorithm finished")
+    # data_split.generate(config=config, download="gif")
+    # print("Data split finished")
+    # messages.generate(config=config, download="gif")
+    # print("Messages finished")
+    # convergence.generate(config=config, download="gif")
+    # print("Convergence finished")
+    # inference.generate(config=config, download="gif")
+    # print("Inference finished")
+    # network.generate(config=config, download="gif")
+    # print("Network finished")
     return html

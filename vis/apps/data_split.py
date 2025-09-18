@@ -7,7 +7,7 @@ from matplotlib.colors import to_hex
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List, Dict
-from config import Config, save_or_print_figures
+from config import Config
 
 config = Config()
 
@@ -129,4 +129,3 @@ def create_bubble_plots(data: DataFrame) -> List[Figure]:
 def generate(config: Config, download: bool = False) -> list[str] | None:
     data: DataFrame = pd.read_csv(config.experiment_path / r"data_split.csv")
     figs: List[Figure] = create_bubble_plots(data)
-    return save_or_print_figures(download, figs, __name__)

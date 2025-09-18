@@ -14,7 +14,7 @@ from plotly.graph_objects import Figure
 from typing import List, Dict
 import numpy.typing as npt
 
-from config import Config, clean, save_or_print_figures
+from config import Config, clean
 
 config: Config = Config()
 
@@ -103,7 +103,7 @@ def create_atable_fig(atable: DataFrame) -> Figure:
     fig.update_layout(
         title_text="Table of Minimum Loss achieved grouped by Type and Network"
     )
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_interaction_plot(atable: DataFrame, var1: str, var2: str) -> Figure:
@@ -120,7 +120,7 @@ def create_interaction_plot(atable: DataFrame, var1: str, var2: str) -> Figure:
         yaxis_title_text=config.variables["maximum_accuracy"]["legend"],
         legend_title_text=config.variables[var2]["legend"],
     )
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_box_plot(df: DataFrame, var: str) -> Figure:
@@ -140,7 +140,7 @@ def create_box_plot(df: DataFrame, var: str) -> Figure:
         yaxis_title_text=config.variables["maximum_accuracy_achieved"]["legend"],
         legend_title_text=config.variables[var]["legend"],
     )
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_anova(df: DataFrame) -> Figure:
@@ -154,7 +154,7 @@ def create_anova(df: DataFrame) -> Figure:
     atable_c.columns = [clean(var) for var in atable_c.columns]
     fig: Figure = ff.create_table(atable_c)
     fig.update_layout(config.plots["anova"]["anova"]["layout"])
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_tuckey_test(df: DataFrame) -> Figure:
@@ -165,7 +165,7 @@ def create_tuckey_test(df: DataFrame) -> Figure:
     pg_test_c.columns = [clean(var) for var in pg_test_c.columns]
     fig: Figure = ff.create_table(pg_test_c)
     fig.update_layout(config.plots["anova"]["tuckey"]["layout"])
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_nemenyi_test(df: DataFrame) -> Figure:
@@ -184,7 +184,7 @@ def create_nemenyi_test(df: DataFrame) -> Figure:
     fig.update_traces(text=nemtable, texttemplate="%{text}")
     fig.update_xaxes(side="top")
     fig.update_layout(config.plots["anova"]["nemenyi"]["layout"])
-    return fig
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
 def create_manova(df: DataFrame) -> MultivariateTestResults:
@@ -200,31 +200,34 @@ def create_manova_figs(result: MultivariateTestResults, var: str) -> List[Figure
     intercept: DataFrame = result.results["Intercept"]["stat"]
     intercept.reset_index(inplace=True)
     intercept = intercept.rename(columns={"index": "tests"})
-    fig: Figure = ff.create_table(intercept.round(3))
-    fig.update_layout(config.plots["anova"]["manova_inter"]["layout"])
+    fig1: Figure = ff.create_table(intercept.round(3))
+    fig1.update_layout(config.plots["anova"]["manova_inter"]["layout"])
 
     var_results: DataFrame = result.results[var]["stat"]
     var_results.reset_index(inplace=True)
     var_results = var_results.rename(columns={"index": "tests"})
     fig2: Figure = ff.create_table(var_results.round(3))
     fig2.update_layout(config.plots["anova"]["manova_var"]["layout"])
+    for fig in [fig1, fig2]:
+        fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
-    return [fig, fig2]
 
-
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config) -> list[str] | None:
+    root: str = "figures"
+    global folder
+    folder = f"{root}/{__name__.split('.')[0]}"
+    isExist: bool = os.path.exists(folder)
+    if not isExist:
+        os.makedirs(folder)
     data: DataFrame = create_df(config)
     atable: DataFrame = create_atable(data)
-    f1: Figure = create_atable_fig(atable)
-    f2: List[Figure] = [
-        create_interaction_plot(atable, "distribution", "ann"),
-        create_interaction_plot(atable, "ann", "distribution"),
-    ]
-    f3: Figure = create_box_plot(data, "distribution")
-    f4: Figure = create_anova(data)
-    f5: Figure = create_tuckey_test(data)
-    f6: Figure = create_nemenyi_test(data)
+    create_atable_fig(atable)
+    create_interaction_plot(atable, "distribution", "ann"),
+    create_interaction_plot(atable, "ann", "distribution"),
+    create_box_plot(data, "distribution")
+    create_anova(data)
+    create_tuckey_test(data)
+    create_nemenyi_test(data)
     manova: MultivariateTestResults = create_manova(data)
-    f7: List[Figure] = create_manova_figs(manova, "distribution")
-    figs: List[Figure] = [f1] + f2 + [f3, f4, f5, f6] + f7
-    return save_or_print_figures(download, figs, __name__)
+    create_manova_figs(manova, "distribution")
+    return [["Figures", "Created"]]

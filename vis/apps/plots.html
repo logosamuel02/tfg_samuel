@@ -51,6 +51,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-light bg-light p-3">
         <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
@@ -200,4 +201,24 @@
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
+
+<script>
+  async function httpGet(theUrl)
+  {   
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+  }
+
+  async function reload(func, time)
+  {
+      func
+      setInterval(func, time);
+  };
+
+  reload(httpGet("http://localhost:10000/gen_anova"), 30000)
+
+</script>
+
 </html>
