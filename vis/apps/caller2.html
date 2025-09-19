@@ -1,15 +1,10 @@
-<div id="printableArea">
-      <h1>Print me</h1>
-</div>
-
-<input type="button" onclick="printDiv('printableArea')" value="print a div!" />
-
 <script>
 async function httpGet(theUrl)
 {   
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
     xmlHttp.send( null );
+    document.write(xmlHttp.responseText);
     return xmlHttp.responseText;
 }
 
@@ -18,7 +13,6 @@ async function reload(theUrl, time)
     httpGet(theUrl)
     setInterval(httpGet(theUrl), time);
 };
-
-reload("http://localhost:10000/manager/plots/anova", 10000)
 </script>
 
+<div><script>reload("http://localhost:10000/manager/plots/anova", 10000)</script></div>

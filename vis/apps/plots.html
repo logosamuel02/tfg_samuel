@@ -217,7 +217,14 @@
       setInterval(func, time);
   };
 
-  reload(httpGet("http://localhost:10000/gen_anova"), 30000)
+  async function reget(module) {
+    $.get(`http://localhost:10000/manager/plots/${module}`, function(data) {
+    $('#filter-target').html(data)
+  });
+  };
+    
+  // reload(httpGet("http://localhost:10000/gen_anova"), 30000)
+  reload(reget("anova"), 5000)
 
 </script>
 
