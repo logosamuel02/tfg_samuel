@@ -1,5 +1,6 @@
 import os
 import json
+import yaml
 from plotly.graph_objects import Figure
 import plotly.io as pio
 from pydantic import BaseModel, DirectoryPath
@@ -122,8 +123,8 @@ class Config(BaseModel):
                 "eraseshape",
             ],
         )
-        with open(r"plots_config.json") as file:
-            self.plots: Dict = json.load(file)
+        with open("config.yaml", "r") as f:
+            self.plots = yaml.load(f, Loader=yaml.SafeLoader)
 
         with open(r"variables.json") as file:
             self.variables: Dict = json.load(file)

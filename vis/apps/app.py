@@ -26,7 +26,19 @@ async def SETTINGS(request):
 
 
 async def ANOVA(request):
-    return {"figures": get_module_figures("anova.py")}
+    return {
+        "figures": get_module_figures("anova.py"),
+        "module": "anova",
+        "gen_module": "gen_anova",
+    }
+
+
+async def GEN_ANOVA(request):
+    form = await request.post()
+    folder_path = rf"{form['folder_path']}"
+    config.source_path = folder_path
+    anova.generate(config)
+    return {"message": "Anova Re-generated"}
 
 
 async def ALGORITHM(request):
@@ -59,11 +71,6 @@ async def DOWNLOAD_SVG(request):
 
 async def DOWNLOAD_GIF(request):
     return {"figures": download.download_gif(config=config)}
-
-
-async def GEN_ANOVA(request):
-    figs = anova.generate(config)
-    return {"figures": figs}
 
 
 class DummyAgent(Agent):
@@ -109,11 +116,6 @@ async def main():
     )
 
     dummy.web.add_get(
-        "/gen_anova",
-        GEN_ANOVA,
-        template="plots.html",
-    )
-    dummy.web.add_get(
         "/manager/plots/settings",
         SETTINGS,
         template="plots_settings.html",
@@ -123,10 +125,10 @@ async def main():
         ANOVA,
         template="plots.html",
     )
-    dummy.web.add_get(
+    dummy.web.add_post(
         "/manager/plots/gen_anova",
         GEN_ANOVA,
-        template="plots.html",
+        template=None,
     )
     dummy.web.add_get(
         "/manager/plots/algorithm",

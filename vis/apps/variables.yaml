@@ -1,0 +1,175 @@
+accuracy:
+  description: Training Accuracy
+  legend: Training Accuracy
+agent:
+  description: Agents
+  legend: Agents
+algorithm:
+  description: Algorithm
+  legend: Algorithm
+algorithm_round:
+  description: Algorithm round
+  legend: Algorithm round
+ann:
+  description: Artificial neural network
+  legend: Artificial neural network
+consensus_iterations:
+  description: Consensus iterations
+  legend: Consensus iterations
+count:
+  description: Sample count
+  legend: Sample count
+dataset:
+  description: Dataset
+  legend: Dataset
+description:
+  description: Learning phase
+  legend: Learning phase
+distribution:
+  description: Distribution
+  legend: Distribution
+epoch:
+  description: Training Epoch
+  legend: Training Epoch
+epoch_or_iteration:
+  description: Epoch or iteration. Epochs are related to train, valdiation ot test
+    phases, but iterations are related to Consensus phases.
+  legend: Epoch or iteration
+experiment:
+  description: Algorithm
+  legend: Experiment
+f1_score:
+  description: Training F1 score
+  legend: Training F1 score
+graph_path:
+  description: Grapth path
+  legend: Grapth path
+graph_path2:
+  description: Algorithm
+  legend: Algorithm
+label:
+  description: Data Label
+  legend: Data Label
+layer:
+  description: ANN Layer
+  legend: ANN layer
+log_name:
+  description: Agent Name
+  legend: Agent Name
+log_timestamp:
+  description: Timestamp
+  legend: Timestamp
+loss:
+  description: Training Loss
+  legend: Training Loss
+max_acc:
+  description: Maximum accuracy achieved
+  legend: Maximum accuracy achieved
+maximum_accuracy:
+  description: Maximum Accuracy
+  legend: Maximum Accuracy
+maximum_accuracy_achieved:
+  description: Maximum accuracy achieved
+  legend: Maximum accuracy achieved
+maximum_f1_achieved:
+  description: Maximum f1 score achieved
+  legend: Maximum f1 score achieved
+maximum_precision_achieved:
+  description: Maximum precision achieved
+  legend: Maximum precision achieved
+maximum_recall_achieved:
+  description: Maximum recall achieved
+  legend: Maximum recall achieved
+mean_seconds_by_round:
+  description: Mean Seconds by Round
+  legend: Mean Seconds by Round
+minimum_loss_achieved:
+  description: Minimum loss achieved
+  legend: Minimum loss achieved
+precision:
+  description: ' Training Precision'
+  legend: Training Precision
+recall:
+  description: Training Recall
+  legend: Training Recall
+seconds_elapsed:
+  description: Seconds elapsed after first agent finished
+  legend: Seconds elapsed after first agent finished
+seconds_to_complete:
+  description: Seconds elapsed per training round
+  legend: Seconds elapsed per training round
+seconds_to_complete_test:
+  description: Seconds elapsed per test round
+  legend: Seconds elapsed per test round
+seconds_to_complete_validation:
+  description: Seconds elapsed per validation round
+  legend: Seconds elapsed per validation round
+seed:
+  description: Seed
+  legend: Seed
+sender:
+  description: Agent Sender
+  legend: Agent Sender
+size:
+  description: Size
+  legend: Size
+start_timestamp:
+  description: Start timestamp
+  legend: Start timestamp
+test_accuracy:
+  description: Test accuracy
+  legend: Test accuracy
+test_f1_score:
+  description: Test f1 score
+  legend: Test f1 score
+test_loss:
+  description: Test loss
+  legend: Test loss
+test_precision:
+  description: Test precision
+  legend: Test precision
+test_recall:
+  description: Test recall
+  legend: Test recall
+thread:
+  description: Conversation Thread
+  legend: Conversation Thread
+timestamp:
+  description: Timestamp
+  legend: Timestamp
+timestamp_minutes:
+  description: Execution time in minutes
+  legend: Execution time in minutes
+to:
+  description: Agent Receiver
+  legend: Agent Receiver
+training_epochs:
+  description: Training epochs
+  legend: Training epochs
+type:
+  description: Type of the message
+  legend: Type of the message
+validation_accuracy:
+  description: Validation accuracy
+  legend: Validation accuracy
+validation_f1_score:
+  description: Validation f1 score
+  legend: Validation f1 score
+validation_loss:
+  description: Validation loss
+  legend: Validation loss
+validation_precision:
+  description: Validation precision
+  legend: Validation precision
+validation_recall:
+  description: Validation recall
+  legend: Validation recall
+weight:
+  description: Mean of thes weights
+  legend: Mean of the weights
+weight_id:
+  description: Weight id
+  legend: Weight id
+xmpp_domain:
+  description: XMPP domain
+  legend: XMPP domain

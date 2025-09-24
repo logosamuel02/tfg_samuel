@@ -230,4 +230,3 @@ def generate(config: Config) -> list[str] | None:
     create_nemenyi_test(data)
     manova: MultivariateTestResults = create_manova(data)
     create_manova_figs(manova, "distribution")
-    return [["Figures", "Created"]]
