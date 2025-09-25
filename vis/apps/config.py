@@ -60,12 +60,14 @@ def download_figures(
         os.makedirs(img_folder)
 
     if download == "svg":
-        for i, F in enumerate(figs):
-            if len(F.frames) > 0:
-                frame = F.frames[-1]
-                F.update(data=frame.data)
-                F.layout.sliders[0].update(active=len(F.frames) - 1)
-            F.write_image(rf"{img_folder}/{F.layout.title.text.replace(' ', '_')}.svg")
+        for i, fig in enumerate(figs):
+            if len(fig.frames) > 0:
+                frame = fig.frames[-1]
+                fig.update(data=frame.data)
+                fig.layout.sliders[0].update(active=len(fig.frames) - 1)
+            fig.write_image(
+                rf"{img_folder}/{fig.layout.title.text.replace(' ', '_')}.svg"
+            )
 
     elif download == "gif":
         for F in figs:

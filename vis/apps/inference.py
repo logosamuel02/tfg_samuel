@@ -183,5 +183,8 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
         if not isExist:
             os.makedirs(folder)
         for fig in figs:
-            print(1)
+            if len(fig.frames) > 0:
+                frame = fig.frames[-1]
+                fig.update(data=frame.data)
+                fig.layout.sliders[0].update(active=len(fig.frames) - 1)
             fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

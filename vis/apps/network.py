@@ -365,7 +365,7 @@ def create_combined_plot(
             cmin=range_color[0],
             cmax=range_color[1],
         ),
-        title_text=f"Network evolution: {config.variables[metric]['legend']} and {clean(msg_type)} messages",
+        title_text=f"Network evolution {config.variables[metric]['legend']} and {clean(msg_type)} messages",
     )
     xmax, xmin = max(x_coords.values()), min(x_coords.values())
     ymax, ymin = max(y_coords.values()), min(y_coords.values())
@@ -415,5 +415,8 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
         if not isExist:
             os.makedirs(folder)
         for fig in figs:
-            print(1)
+            if len(fig.frames) > 0:
+                frame = fig.frames[-1]
+                fig.update(data=frame.data)
+                fig.layout.sliders[0].update(active=len(fig.frames) - 1)
             fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")
