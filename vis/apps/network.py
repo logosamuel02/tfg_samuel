@@ -1,3 +1,4 @@
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -376,7 +377,7 @@ def create_combined_plot(
     return combined_plot
 
 
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     messages: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
     inference: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
     global metric
@@ -396,3 +397,23 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     )
 
     figs: List[Figure] = [combined_plot, nodes_plot, edges_plot]
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

@@ -1,3 +1,4 @@
+import os
 import plotly.express as px
 import pandas as pd
 import plotly.figure_factory as ff
@@ -135,7 +136,7 @@ def distribution_info_type(data: DataFrame) -> Figure:
     return fig
 
 
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     data: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
     f0: Figure = heatmap_messages(data)
     f1: Figure = heatmap_sizes(data)
@@ -146,3 +147,23 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     f5: Figure = distribution_info(dist_data)
     f6: Figure = distribution_info_type(dist_data)
     figs: List[Figure] = [f0, f1, f2, f3, f4, f5, f6]
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

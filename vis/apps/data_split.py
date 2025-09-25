@@ -1,3 +1,4 @@
+import os
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
@@ -126,6 +127,26 @@ def create_bubble_plots(data: DataFrame) -> List[Figure]:
     return figs
 
 
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     data: DataFrame = pd.read_csv(config.experiment_path / r"data_split.csv")
     figs: List[Figure] = create_bubble_plots(data)
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

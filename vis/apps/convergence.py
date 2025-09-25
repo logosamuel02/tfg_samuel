@@ -1,3 +1,4 @@
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -171,19 +172,40 @@ def set_globals_sublayer(data: DataFrame, layer: str, index: int) -> None:
     max_x = data[layers_opts[layer][index]].max()
 
 
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     data: DataFrame = create_df(config)
     figs = []
-    for layer in layers_opts.keys():
-        set_globals_layer(data, layer)
-        scater_xy: Figure = create_xy_scatter_plot(data, layer)
-        figs.append(scater_xy)
-        for i, layer_type in enumerate(layers_opts[layer]):
-            set_globals_sublayer(data, layer, i)
-            scatter_plot: Figure = create_scatter_plot(data, layers_opts[layer][i])
-            line_plot: Figure = create_line_plot(data, layers_opts[layer][i])
-            combined_plot: Figure = create_combined_plot(
-                scatter_plot, line_plot, layers_opts[layer][i]
-            )
-            figs.append(combined_plot)
-        print(f"Created plots for {layer.upper()} layer")
+    # for layer in layers_opts.keys():
+    layer = "conv1"
+    set_globals_layer(data, layer)
+    scater_xy: Figure = create_xy_scatter_plot(data, layer)
+    figs.append(scater_xy)
+    for i, layer_type in enumerate(layers_opts[layer]):
+        set_globals_sublayer(data, layer, i)
+        scatter_plot: Figure = create_scatter_plot(data, layers_opts[layer][i])
+        line_plot: Figure = create_line_plot(data, layers_opts[layer][i])
+        combined_plot: Figure = create_combined_plot(
+            scatter_plot, line_plot, layers_opts[layer][i]
+        )
+        figs.append(combined_plot)
+    print(f"Created plots for {layer.upper()} layer")
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

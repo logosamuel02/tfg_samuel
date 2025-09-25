@@ -1,3 +1,4 @@
+import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -157,10 +158,30 @@ def train_test_network(train: DataFrame, test: DataFrame) -> List[Figure]:
     return figs
 
 
-def generate(config: Config, download: bool = False) -> list[str] | None:
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     train: DataFrame = pd.read_csv(config.experiment_path / r"nn_train.csv")
     test: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
     f1: List[Figure] = train_by_agent(train)
     f2: List[Figure] = test_by_agent(test)
     f3: List[Figure] = train_test_network(train, test)
     figs: List[Figure] = f1 + f2 + f3
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")
