@@ -103,7 +103,7 @@ def create_atable_fig(atable: DataFrame) -> Figure:
     fig.update_layout(
         title_text="Table of Minimum Loss achieved grouped by Type and Network"
     )
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_interaction_plot(atable: DataFrame, var1: str, var2: str) -> Figure:
@@ -120,7 +120,7 @@ def create_interaction_plot(atable: DataFrame, var1: str, var2: str) -> Figure:
         yaxis_title_text=config.variables["maximum_accuracy"]["legend"],
         legend_title_text=config.variables[var2]["legend"],
     )
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_box_plot(df: DataFrame, var: str) -> Figure:
@@ -140,7 +140,7 @@ def create_box_plot(df: DataFrame, var: str) -> Figure:
         yaxis_title_text=config.variables["maximum_accuracy_achieved"]["legend"],
         legend_title_text=config.variables[var]["legend"],
     )
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_anova(df: DataFrame) -> Figure:
@@ -154,7 +154,7 @@ def create_anova(df: DataFrame) -> Figure:
     atable_c.columns = [clean(var) for var in atable_c.columns]
     fig: Figure = ff.create_table(atable_c)
     fig.update_layout(config.plots["anova"]["anova"]["layout"])
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_tuckey_test(df: DataFrame) -> Figure:
@@ -165,7 +165,7 @@ def create_tuckey_test(df: DataFrame) -> Figure:
     pg_test_c.columns = [clean(var) for var in pg_test_c.columns]
     fig: Figure = ff.create_table(pg_test_c)
     fig.update_layout(config.plots["anova"]["tuckey"]["layout"])
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_nemenyi_test(df: DataFrame) -> Figure:
@@ -184,7 +184,7 @@ def create_nemenyi_test(df: DataFrame) -> Figure:
     fig.update_traces(text=nemtable, texttemplate="%{text}")
     fig.update_xaxes(side="top")
     fig.update_layout(config.plots["anova"]["nemenyi"]["layout"])
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return fig
 
 
 def create_manova(df: DataFrame) -> MultivariateTestResults:
@@ -208,25 +208,39 @@ def create_manova_figs(result: MultivariateTestResults, var: str) -> List[Figure
     var_results = var_results.rename(columns={"index": "tests"})
     fig2: Figure = ff.create_table(var_results.round(3))
     fig2.update_layout(config.plots["anova"]["manova_var"]["layout"])
-    for fig in [fig1, fig2]:
-        fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    return [fig1, fig2]
 
 
-def generate(config: Config) -> list[str] | None:
-    root: str = "figures"
-    global folder
-    folder = f"{root}/{__name__.split('.')[0]}"
-    isExist: bool = os.path.exists(folder)
-    if not isExist:
-        os.makedirs(folder)
+def generate(config: Config, action: str = "generate") -> list[str] | None:
     data: DataFrame = create_df(config)
     atable: DataFrame = create_atable(data)
-    create_atable_fig(atable)
-    create_interaction_plot(atable, "distribution", "ann"),
-    create_interaction_plot(atable, "ann", "distribution"),
-    create_box_plot(data, "distribution")
-    create_anova(data)
-    create_tuckey_test(data)
-    create_nemenyi_test(data)
+    f1 = create_atable_fig(atable)
+    f2 = create_interaction_plot(atable, "distribution", "ann")
+    f3 = create_interaction_plot(atable, "ann", "distribution")
+    f4 = create_box_plot(data, "distribution")
+    f5 = create_anova(data)
+    f6 = create_tuckey_test(data)
+    f7 = create_nemenyi_test(data)
     manova: MultivariateTestResults = create_manova(data)
-    create_manova_figs(manova, "distribution")
+    f8 = create_manova_figs(manova, "distribution")
+    figs = [f1, f2, f3, f4, f5, f6, f7] + f8
+
+    if action not in ["generate", "download"]:
+        return figs
+
+    if action == "generate":
+        folder = f"figures/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    else:
+        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        isExist: bool = os.path.exists(folder)
+        if not isExist:
+            os.makedirs(folder)
+        for fig in figs:
+            print(1)
+            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")

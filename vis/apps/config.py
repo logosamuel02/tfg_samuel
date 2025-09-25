@@ -3,7 +3,8 @@ import json
 import yaml
 from plotly.graph_objects import Figure
 import plotly.io as pio
-from pydantic import BaseModel, DirectoryPath
+from pydantic import DirectoryPath
+from dataclasses import dataclass, field
 from dotenv import load_dotenv
 from typing import List, Dict
 from pathlib import Path
@@ -49,9 +50,10 @@ def get_module_figures(module: str):
     return html_tuples
 
 
-def download_figures(download: str, module: str) -> List[str] | None:
+def download_figures(
+    download: str, module: str, root_img: str = "images"
+) -> List[str] | None:
     figs = load_module_figures(module)
-    root_img: str = "images"
     img_folder: str = rf"{root_img}/{module.split('.')[0]}"
     isExistImg: bool = os.path.exists(img_folder)
     if not isExistImg:
@@ -95,18 +97,19 @@ def download_figures(download: str, module: str) -> List[str] | None:
                 )
 
 
-class Config(BaseModel):
+@dataclass
+class Config:
     source_path: DirectoryPath = (
         r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments"
     )
-    experiment_path: DirectoryPath = None
-    fig_config: Dict = None
-    fig_buttons: Dict = None
-    plots: Dict = None
-    variables: Dict = None
-    gif: Dict = None
+    experiment_path: DirectoryPath = field(init=False)
+    output_path: str = "images"
+    fig_buttons: Dict = field(init=False)
+    plots: str = "config.yaml"
+    variables: str = "variables.yaml"
+    gif: Dict = field(init=False)
 
-    def model_post_init(self, __context):
+    def __post_init__(self):
         self.source_path: Path = Path(rf"{self.source_path}")
         self.experiment_path: Path = (
             self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
@@ -123,14 +126,10 @@ class Config(BaseModel):
                 "eraseshape",
             ],
         )
-        with open("config.yaml", "r") as f:
-            self.plots = yaml.load(f, Loader=yaml.SafeLoader)
+        with open(rf"{self.plots}", "r") as file:
+            self.plots = yaml.load(file, Loader=yaml.SafeLoader)
 
-        with open(r"variables.json") as file:
-            self.variables: Dict = json.load(file)
+        with open(rf"{self.variables}", "r") as f:
+            self.variables = yaml.load(f, Loader=yaml.SafeLoader)
 
         self.gif = {"n_of_frames": 3, "frame_duration": 2}
-
-
-config = Config()
-print(config.model_dump())
