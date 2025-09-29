@@ -7,58 +7,22 @@ import numpy as np
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List, Dict
-from config import Config, clean
+import preprocess as pre
+from export import Config, clean
 
 config = Config()
 
 
-def create_df(config: Config) -> DataFrame:
-    df: DataFrame = pd.read_csv(config.experiment_path / r"nn_convergence.csv")
-    lst: List[str] = df.layer.unique()
-    split_layer_str = lambda x: x.split(".")[0]
-    global layers_opts
-    layers_opts = {
-        split_layer_str(k): list(g)
-        for k, g in groupby(sorted(lst, key=split_layer_str), key=split_layer_str)
-    }
-    df: DataFrame = df[(df.description == "PRE-TRAIN") & (df.epoch_or_iteration == 1)]
-    pivot: DataFrame = df.pivot(columns="layer", values="weight")
-    df = df[df.layer == layers_opts["conv1"][0]].reset_index()
-
-    for layer in layers_opts.keys():
-        df[layers_opts[layer][0]] = (
-            pivot[layers_opts[layer][0]]
-            .dropna()
-            .reset_index()[f"{layers_opts[layer][0]}"]
-        )
-        df[layers_opts[layer][1]] = (
-            pivot[layers_opts[layer][1]]
-            .dropna()
-            .reset_index()[f"{layers_opts[layer][1]}"]
-        )
-
-    df = df.sort_values(
-        [
-            "algorithm_round",
-            "agent",
-        ],
-        ignore_index=True,
-    )
-    N_UNIQUE_AGENTS: int = df["agent"].nunique()
-    df_indexed: DataFrame = pd.DataFrame()
-    for index in np.arange(start=0, stop=len(df) + 1, step=N_UNIQUE_AGENTS):
-        df_slicing: DataFrame = df.iloc[:index].copy()
-        df_slicing["frame"] = index // N_UNIQUE_AGENTS
-        df_indexed: DataFrame = pd.concat([df_indexed, df_slicing])
-
-    return df_indexed
-
-
-def create_xy_scatter_plot(data: DataFrame, layer: str) -> Figure:
+def create_xy_scatter_plot(layer: str) -> Figure:
+    data = pre.convergence_df()
+    min_x = data[config.layers_opts[layer][0]].min()
+    min_y = data[config.layers_opts[layer][1]].min()
+    max_x = data[config.layers_opts[layer][0]].max()
+    max_y = data[config.layers_opts[layer][1]].max()
     fig: Figure = px.scatter(
         data,
-        x=layers_opts[layer][0],
-        y=layers_opts[layer][1],
+        x=config.layers_opts[layer][0],
+        y=config.layers_opts[layer][1],
         animation_frame="algorithm_round",
         color="agent",
         hover_name="agent",
@@ -68,14 +32,15 @@ def create_xy_scatter_plot(data: DataFrame, layer: str) -> Figure:
     fig.update_layout(title_text=f"{layer.upper()} layer evolution of agents")
     fig.update_layout(config.plots["convergence"]["xy_scatter"]["layout"])
     fig.update_layout(
-        xaxis_title_text=clean(layers_opts[layer][0]),
-        yaxis_title_text=clean(layers_opts[layer][1]),
+        xaxis_title_text=clean(config.layers_opts[layer][0]),
+        yaxis_title_text=clean(config.layers_opts[layer][1]),
         legend_title_text=config.variables["agent"]["legend"],
     )
     return fig
 
 
-def create_scatter_plot(data: DataFrame, sublayer: str) -> Figure:
+def create_scatter_plot(sublayer: str) -> Figure:
+    data = pre.convergence_df()
     scatter_plot: Figure = px.scatter(
         data,
         x="algorithm_round",
@@ -95,11 +60,14 @@ def create_scatter_plot(data: DataFrame, sublayer: str) -> Figure:
     return scatter_plot
 
 
-def create_line_plot(data: DataFrame, sublayer: str) -> Figure:
+def create_line_plot(data: DataFrame, layer: str, index: 0 | 1 = 0) -> Figure:
+    data = pre.convergence_df()
+    min_x = data[config.layers_opts[layer][index]].min()
+    max_x = data[config.layers_opts[layer][index]].max()
     line_plot: Figure = px.line(
         data,
         x="algorithm_round",
-        y=sublayer,
+        y=layer,
         color="agent",
         animation_frame="frame",
         range_x=[0, len(data.algorithm_round.unique()) + 1],
@@ -154,41 +122,18 @@ def create_combined_plot(
     return combined_plot
 
 
-def set_globals_layer(data: DataFrame, layer: str) -> None:
-    global min_x
-    min_x = data[layers_opts[layer][0]].min()
-    global min_y
-    min_y = data[layers_opts[layer][1]].min()
-    global max_x
-    max_x = data[layers_opts[layer][0]].max()
-    global max_y
-    max_y = data[layers_opts[layer][1]].max()
-
-
-def set_globals_sublayer(data: DataFrame, layer: str, index: int) -> None:
-    global min_x
-    min_x = data[layers_opts[layer][index]].min()
-    global max_x
-    max_x = data[layers_opts[layer][index]].max()
-
-
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    data: DataFrame = create_df(config)
     figs = []
-    # for layer in layers_opts.keys():
     layer = "conv1"
-    set_globals_layer(data, layer)
-    scater_xy: Figure = create_xy_scatter_plot(data, layer)
+    scater_xy: Figure = create_xy_scatter_plot(layer)
     figs.append(scater_xy)
-    for i, layer_type in enumerate(layers_opts[layer]):
-        set_globals_sublayer(data, layer, i)
-        scatter_plot: Figure = create_scatter_plot(data, layers_opts[layer][i])
-        line_plot: Figure = create_line_plot(data, layers_opts[layer][i])
+    for i, layer_type in enumerate(config.layers_opts[layer]):
+        scatter_plot: Figure = create_scatter_plot(config.layers_opts[layer][i])
+        line_plot: Figure = create_line_plot(config.layers_opts[layer][i])
         combined_plot: Figure = create_combined_plot(
-            scatter_plot, line_plot, layers_opts[layer][i]
+            scatter_plot, line_plot, config.layers_opts[layer][i]
         )
         figs.append(combined_plot)
-    print(f"Created plots for {layer.upper()} layer")
 
     if action not in ["generate", "download"]:
         return figs

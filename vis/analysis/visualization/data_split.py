@@ -8,79 +8,20 @@ from matplotlib.colors import to_hex
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List, Dict
-from config import Config
+import preprocess as pre
+from export import Config
 
 config = Config()
 
 
-def create_bubble_plots(data: DataFrame) -> List[Figure]:
-    agents: List[str] = data.agent.unique()
-
-    cmaps: List[cm.LinearColormap] = [
-        cm.linear.Pastel1_03.scale(0, 2),
-        cm.linear.Pastel1_04.scale(0, 3),
-        cm.linear.Pastel1_05.scale(0, 4),
-        cm.linear.Pastel1_06.scale(0, 5),
-        cm.linear.Pastel1_07.scale(0, 6),
-        cm.linear.Pastel1_08.scale(0, 7),
-        cm.linear.Pastel1_09.scale(0, 8),
-    ]
-    dic_cmaps: Dict[str, cm.LinearColormap] = {
-        str(i + 3): cmap for i, cmap in enumerate(cmaps)
-    }
-    labels: List[str] = data.label.unique()
-
-    try:
-        cmap: cm.LinearColormap = dic_cmaps[str(len(labels))]
-    except KeyError:
-        if len(labels) < 3:
-            cmap: cm.LinearColormap = cm.linear.Pastel1_03.scale(0, len(labels) - 1)
-        else:
-            cmap: cm.LinearColormap = cm.linear.Pastel1_09.scale(0, len(labels) - 1)
-
-    colors: List[str] = ["white"] + [cmap(i) for i in range(len(labels))] + ["white"]
-    colors = list(map(to_hex, colors))
-
+def create_bubble_plots() -> List[Figure]:
+    colors = pre.bubble_colors()
     figs = []
     phases: List[str] = ["train", "validation", "test"]
     visible: bool = True
     for phase in phases:
         fig: Figure = go.Figure()
-        labels: List[str] = data.label.unique()
-        X: npt.NDArray[np.int64] = np.zeros((len(labels) + 2, len(agents) + 2))
-        for i, agent in enumerate(agents):
-            split_data: DataFrame = data[
-                (data.agent == agent) & (data.description == phase)
-            ]
-            for x, (_, row) in enumerate(split_data.iterrows()):
-                X[row.label + 1, i + 1] = row["count"]
-
-        scale: int = 10
-        M, N = X.shape
-        X_sizes: npt.NDArray[np.int64] = X.copy()
-        for i in range(M):
-            xmin, xmax = X_sizes[i, :].min(), X_sizes[i, :].max()
-            tmin, tmax = (
-                config.plots["data_split"]["bubble"]["size_factors"]["min_bubble_size"],
-                config.plots["data_split"]["bubble"]["size_factors"]["max_bubble_size"],
-            )
-            X_sizes[i, :] = (X_sizes[i, :] - xmin) / (xmax - xmin) * (
-                tmax - tmin
-            ) + tmin
-        x = []
-        y = []
-        colores = []
-        sizes = []
-        texts = []
-        for j in range(N):
-            for i in range(M):
-                color = colors[i]
-                if X[i, j] != 0:
-                    x.append(j)
-                    y.append(i)
-                    colores.append(color)
-                    sizes.append(X_sizes[i, j])
-                    texts.append(f"{int(X[i,j])}")
+        agents, labels, x, y, colores, sizes, texts = pre.bubble_interprocess()
         fig.add_trace(
             go.Scatter(
                 mode="markers+text",
@@ -128,8 +69,7 @@ def create_bubble_plots(data: DataFrame) -> List[Figure]:
 
 
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    data: DataFrame = pd.read_csv(config.experiment_path / r"data_split.csv")
-    figs: List[Figure] = create_bubble_plots(data)
+    figs: List[Figure] = create_bubble_plots()
 
     if action not in ["generate", "download"]:
         return figs

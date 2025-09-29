@@ -5,12 +5,15 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List
-from config import Config, clean
+import preprocess as pre
+import loaders as load
+from export import Config, clean
 
 config = Config()
 
 
-def train_by_agent(train: DataFrame) -> List[Figure]:
+def train_by_agent() -> List[Figure]:
+    train = load.train_dataset()
     metrics: List[str] = ["accuracy", "loss", "precision", "recall", "f1_score"]
     figs = []
     for metric in metrics:
@@ -31,7 +34,8 @@ def train_by_agent(train: DataFrame) -> List[Figure]:
     return figs
 
 
-def test_by_agent(test: DataFrame) -> List[Figure]:
+def test_by_agent() -> List[Figure]:
+    test = load.inference_dataset()
     metrics: List[str] = [
         "test_accuracy",
         "test_loss",
@@ -58,7 +62,9 @@ def test_by_agent(test: DataFrame) -> List[Figure]:
     return figs
 
 
-def train_test_network(train: DataFrame, test: DataFrame) -> List[Figure]:
+def train_test_network() -> List[Figure]:
+    train = load.train_dataset()
+    test = load.inference_dataset()
     metrics: List[str] = ["accuracy", "loss", "precision", "recall", "f1_score"]
     figs = []
     for metric in metrics:
@@ -159,11 +165,9 @@ def train_test_network(train: DataFrame, test: DataFrame) -> List[Figure]:
 
 
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    train: DataFrame = pd.read_csv(config.experiment_path / r"nn_train.csv")
-    test: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
-    f1: List[Figure] = train_by_agent(train)
-    f2: List[Figure] = test_by_agent(test)
-    f3: List[Figure] = train_test_network(train, test)
+    f1: List[Figure] = train_by_agent()
+    f2: List[Figure] = test_by_agent()
+    f3: List[Figure] = train_test_network()
     figs: List[Figure] = f1 + f2 + f3
 
     if action not in ["generate", "download"]:

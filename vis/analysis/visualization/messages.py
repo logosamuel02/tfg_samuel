@@ -6,17 +6,14 @@ from pandas.core.frame import DataFrame
 from pandas._libs.tslibs.timestamps import Timestamp
 from plotly.graph_objects import Figure
 from typing import List
-from config import Config, clean
+import preprocess as pre
+from export import Config, clean
 
 config = Config()
 
 
-def heatmap_messages(data: DataFrame) -> Figure:
-    data: DataFrame = data[["sender", "to"]]
-    data.sender = list(map(lambda x: x.split("@")[0], data.sender))
-    data.to = list(map(lambda x: x.split("@")[0], data.to))
-    data_cross = pd.crosstab(index=data.sender, columns=data.to)
-    agents: List[str] = data.sender.unique()
+def heatmap_messages() -> Figure:
+    agents, data_cross = pre.heatmap_messages()
     fig: Figure = px.imshow(
         data_cross.to_numpy(),
         x=agents,
@@ -30,19 +27,8 @@ def heatmap_messages(data: DataFrame) -> Figure:
     return fig
 
 
-def heatmap_sizes(data: DataFrame) -> Figure:
-    data: DataFrame = data[["sender", "to", "size"]]
-    data.sender = list(map(lambda x: x.split("@")[0], data.sender))
-    data.to = list(map(lambda x: x.split("@")[0], data.to))
-    data_cross: DataFrame = (
-        data.groupby(["sender", "to"])["size"]
-        .sum()
-        .div(1024 * 1024)
-        .round(0)
-        .unstack()
-        .fillna(0)
-    )
-    agents: List[str] = data.sender.unique()
+def heatmap_sizes() -> Figure:
+    agents, data_cross = pre.heatmap_sizes()
     fig: Figure = px.imshow(
         data_cross.to_numpy(),
         x=agents,
@@ -56,41 +42,15 @@ def heatmap_sizes(data: DataFrame) -> Figure:
     return fig
 
 
-def statistics_messages(data: DataFrame) -> Figure:
-    stats: DataFrame = (
-        data.groupby("type")
-        .agg(
-            number_of_messages=("size", "count"),
-            total_size_kB=("size", "sum"),
-            average_size_kb=("size", "mean"),
-            standard_deviation_kb=("size", "std"),
-            minimum_size_kb=("size", "min"),
-            maximum_size_kb=("size", "max"),
-        )
-        .round(2)
-        .reset_index()
-    )
-    stats.loc[:, ~stats.columns.isin(["number_of_messages", "type"])] = (
-        stats.loc[:, ~stats.columns.isin(["number_of_messages", "type"])] / 1024
-    ).round(2)
-    # stats["number_of_messages"] = stats["number_of_messages"] * 1024
-    stats_c: DataFrame = stats.copy()
-    stats_c.columns = [clean(var) for var in stats_c.columns]
-    fig: Figure = ff.create_table(stats_c)
+def statistics_messages() -> Figure:
+    stats = pre.statistics_messages()
+    fig: Figure = ff.create_table(stats)
     fig.update_layout(config.plots["messages"]["table_msg"]["layout"])
     return fig
 
 
-def create_distribution_data(data: DataFrame) -> Figure:
-    data.timestamp = pd.to_datetime(data.timestamp)
-    min_date: Timestamp = data.timestamp.min()
-    data["timestamp_minutes"] = data.timestamp.apply(
-        lambda x: int((x - min_date).total_seconds() / 60.0)
-    )
-    return data
-
-
-def distribution_messages(data: DataFrame) -> Figure:
+def distribution_messages() -> Figure:
+    data = pre.distribution_data_df()
     fig: Figure = px.histogram(data, x="timestamp_minutes")
     fig.update_layout(config.plots["messages"]["dist_msg"]["layout"])
     fig.update_traces(config.plots["messages"]["dist_msg"]["traces"])
@@ -101,7 +61,8 @@ def distribution_messages(data: DataFrame) -> Figure:
     return fig
 
 
-def distribution_messages_types(data: DataFrame) -> Figure:
+def distribution_messages_types() -> Figure:
+    data = pre.distribution_data_df()
     fig: Figure = px.histogram(data, x="timestamp_minutes", color="type")
     fig.update_layout(config.plots["messages"]["dist_msg_type"]["layout"])
     fig.update_layout(
@@ -112,7 +73,8 @@ def distribution_messages_types(data: DataFrame) -> Figure:
     return fig
 
 
-def distribution_info(data: DataFrame) -> Figure:
+def distribution_info() -> Figure:
+    data = pre.distribution_data_df()
     fig: Figure = px.histogram(
         data, x="timestamp_minutes", y="size", color_discrete_sequence=["indianred"]
     )
@@ -125,7 +87,8 @@ def distribution_info(data: DataFrame) -> Figure:
     return fig
 
 
-def distribution_info_type(data: DataFrame) -> Figure:
+def distribution_info_type() -> Figure:
+    data = pre.distribution_data_df()
     fig: Figure = px.histogram(data, x="timestamp_minutes", y="size", color="type")
     fig.update_layout(config.plots["messages"]["dist_info_type"]["layout"])
     fig.update_layout(
@@ -137,15 +100,13 @@ def distribution_info_type(data: DataFrame) -> Figure:
 
 
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    data: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
-    f0: Figure = heatmap_messages(data)
-    f1: Figure = heatmap_sizes(data)
-    f2: Figure = statistics_messages(data)
-    dist_data: DataFrame = create_distribution_data(data)
-    f3: Figure = distribution_messages(dist_data)
-    f4: Figure = distribution_messages_types(dist_data)
-    f5: Figure = distribution_info(dist_data)
-    f6: Figure = distribution_info_type(dist_data)
+    f0: Figure = heatmap_messages()
+    f1: Figure = heatmap_sizes()
+    f2: Figure = statistics_messages()
+    f3: Figure = distribution_messages()
+    f4: Figure = distribution_messages_types()
+    f5: Figure = distribution_info()
+    f6: Figure = distribution_info_type()
     figs: List[Figure] = [f0, f1, f2, f3, f4, f5, f6]
 
     if action not in ["generate", "download"]:

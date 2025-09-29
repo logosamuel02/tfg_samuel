@@ -1,5 +1,4 @@
 import os
-import json
 import yaml
 from plotly.graph_objects import Figure
 import plotly.io as pio
@@ -13,12 +12,6 @@ import PIL
 import io
 
 load_dotenv()
-
-
-def clean(var: str) -> str:
-    var: str = " ".join(var.split("_"))
-    var = var.replace(".", " ")
-    return var.capitalize()
 
 
 def load_figure(filename: str):
@@ -59,14 +52,14 @@ def download_figures(
     if not isExistImg:
         os.makedirs(img_folder)
 
-    if download == "svg":
+    if download in ["jpeg", "webp", "svg", "pdf", "eps", "png"]:
         for i, fig in enumerate(figs):
             if len(fig.frames) > 0:
                 frame = fig.frames[-1]
                 fig.update(data=frame.data)
                 fig.layout.sliders[0].update(active=len(fig.frames) - 1)
             fig.write_image(
-                rf"{img_folder}/{fig.layout.title.text.replace(' ', '_')}.svg"
+                rf"{img_folder}/{fig.layout.title.text.replace(' ', '_')}.{download}"
             )
 
     elif download == "gif":
@@ -97,6 +90,10 @@ def download_figures(
                     duration=frame_duration,
                     loop=0,
                 )
+    else:
+        print(
+            "Invalid download format. Available: [jpeg, webp, svg, pdf, eps, png, gif]"
+        )
 
 
 @dataclass
@@ -107,8 +104,8 @@ class Config:
     experiment_path: DirectoryPath = field(init=False)
     output_path: str = "images"
     fig_buttons: Dict = field(init=False)
-    plots: str = "config.yaml"
-    variables: str = "variables.yaml"
+    plots: str = "config_files/config.yaml"
+    variables: str = r"config_files/variables.yaml"
     gif: Dict = field(init=False)
 
     def __post_init__(self):

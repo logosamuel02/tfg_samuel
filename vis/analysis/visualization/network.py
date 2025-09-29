@@ -2,129 +2,29 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-import networkx as nx
+
 import numpy as np
 import numpy.typing as npt
 import warnings
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
-from networkx.classes import Graph
+
 from pandas._libs.tslibs.timestamps import Timestamp
 from typing import List, Dict
-from config import Config, clean
+import preprocess as pre
+from export import Config, clean
 
 config = Config()
 
 warnings.filterwarnings("ignore")
 
 
-def create_coordinates(
-    messages: DataFrame,
-):
-    # CONVERT DATA
-    messages_mod: DataFrame = messages.copy()
-    messages_mod = messages_mod[
-        ["sender", "to"]
-    ]  # [(messages_mod.algorithm_round <= 100)
-    messages_mod.sender = messages_mod.sender.apply(lambda x: x.split("@")[0])
-    messages_mod.to = messages_mod.to.apply(lambda x: x.split("@")[0])
+def create_nodes_plot(x_coords, y_coords) -> Figure:
+    nodes, edges, timestamps, metric, msg_type = pre.create_network_artifacts()
 
-    agents: List[str] = sorted(messages_mod.sender.unique())
-
-    # GENERATE COORDINATES
-    cross: DataFrame = pd.crosstab(index=messages_mod.sender, columns=messages_mod.to)
-    G: Graph = nx.random_geometric_graph(len(agents), 0)
-    G = nx.relabel_nodes(G, {i: a for i, a in enumerate(agents)})
-    tuples: DataFrame = cross.stack().reset_index()
-    tuples = tuples[tuples[0] > 0]
-    tuples = list(tuples.itertuples(index=False))
-    G.add_weighted_edges_from(tuples)
-
-    node_x = []
-    node_y = []
-    for node in G.nodes():
-        x, y = G.nodes[node]["pos"]
-        node_x.append(x)
-        node_y.append(y)
-
-    np.random.seed(2)
-
-    x_dictionary: Dict[str : npt.NDArray[np.float64]] = {
-        x: node_x[i] for i, x in enumerate(agents)
-    }
-    y_dictionary: Dict[str : npt.NDArray[np.float64]] = {
-        x: node_y[i] for i, x in enumerate(agents)
-    }
-    return x_dictionary, y_dictionary
-
-
-def create_edges_df(messages: DataFrame) -> DataFrame:
-    edges: DataFrame = messages.copy()
-    edges = edges[["sender", "to", "timestamp", "algorithm_round"]][
-        edges.type == msg_type
-    ]
-    edges[["sender", "domain"]] = edges.sender.str.split("@", expand=True)
-    edges[["to", "domain2"]] = edges.to.str.split("@", expand=True)
-    edges = edges.drop(["domain", "domain2", "algorithm_round"], axis=1)
-    edges["edge"] = list(map(lambda x: tuple(sorted(x)), zip(edges.sender, edges.to)))
-    edges["weight"] = edges.groupby(["edge"]).cumcount().add(1)
-    edges["timestamp"] = pd.to_datetime(edges.timestamp)
-    edges["timestamp"] = edges.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
-    edges["timestamp"] = pd.to_datetime(edges.timestamp)
-    first_date: Timestamp = edges.timestamp.min()
-    edges["timestamp"] = edges.timestamp.apply(
-        lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
+    nodes, range_color = pre.nodes_panel_data(
+        timestamps, nodes, timestamps, x_coords, y_coords, metric
     )
-    return edges
-
-
-def create_nodes_df(inference: DataFrame) -> DataFrame:
-    nodes: DataFrame = inference.copy()
-    nodes = nodes[["agent", "timestamp", metric]]
-
-    nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
-    nodes["timestamp"] = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
-    nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
-    first_date: Timestamp = nodes.timestamp.min()
-    nodes["timestamp"] = nodes.timestamp.apply(
-        lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
-    )
-    return nodes
-
-
-def create_nodes_plot(
-    nodes: DataFrame,
-    timestamps: List[float],
-    x_coords,
-    y_coords,
-) -> Figure:
-    ## CONVERT TO PANEL DATA
-    nodes["agent_id"] = nodes.groupby(nodes.columns.tolist(), sort=False).ngroup() + 1
-    mux: DataFrame = pd.MultiIndex.from_product(
-        [timestamps, np.array(nodes.agent.unique())],
-        names=["timestamp", "agent"],
-    )
-
-    nodes = nodes.set_index(["timestamp", "agent"]).reindex(mux).reset_index()
-    for agent in nodes.agent.unique():
-        nodes[nodes.agent == agent] = nodes[nodes.agent == agent].fillna(method="ffill")
-    nodes = nodes.fillna(0)
-
-    def set_value(
-        row_number: str, assigned_value: Dict[str, List[float]]
-    ) -> List[float]:
-        return assigned_value[row_number]
-
-    nodes["X"] = nodes["agent"].apply(set_value, args=(x_coords,))
-    nodes["Y"] = nodes["agent"].apply(set_value, args=(y_coords,))
-    global range_color
-    range_color = [
-        float(nodes[metric].min()),
-        float(nodes[metric].max()),
-    ]
-    nodes["size"] = [35 for x in range(len(nodes))]
-
-    # CREATE NODES PLOT
 
     nodes_plot: Figure = px.scatter(
         nodes,
@@ -161,48 +61,13 @@ def create_nodes_plot(
     )
 
     nodes_plot.update_layout(config.plots["network"]["nodes"]["layout"])
-    return nodes_plot
+    return range_color, nodes_plot
 
 
-def create_edges_plot(
-    edges: DataFrame,
-    timestamps: List[float],
-    x_coords,
-    y_coords,
-) -> Figure:
-    ## CONVERT TO PANEL DATA
-    keep: DataFrame = edges.groupby(["timestamp", "edge"])["timestamp"].idxmax()
-    edges: DataFrame = edges.loc[keep]
-    mux: DataFrame = pd.MultiIndex.from_product(
-        [timestamps, np.array(edges.edge.unique())],
-        names=["timestamp", "edge"],
-    )
-    edges = edges.set_index(["timestamp", "edge"]).reindex(mux).reset_index()
-    for agent in edges.edge.unique():
-        edges[edges.edge == agent] = edges[edges.edge == agent].fillna(method="ffill")
-    edges = edges.fillna(0)
+def create_edges_plot(x_coords, y_coords) -> Figure:
+    nodes, edges, timestamps, metric, msg_type = pre.create_network_artifacts()
+    edges = pre.edges_panel_data(edges, timestamps, x_coords, y_coords)
 
-    ## LAST EDGE TRANSFORMATIONS
-    def set_value(
-        row_number: str, assigned_value: Dict[str, List[float]]
-    ) -> List[float]:
-        return assigned_value[row_number]
-
-    edges["sender"] = list(map(lambda x: x[0], edges.edge))
-    edges["to"] = list(map(lambda x: x[1], edges.edge))
-    edges["X_sender"] = edges["sender"].apply(set_value, args=(x_coords,))
-    edges["Y_sender"] = edges["sender"].apply(set_value, args=(y_coords,))
-    edges["X_to"] = edges["to"].apply(set_value, args=(x_coords,))
-    edges["Y_to"] = edges["to"].apply(set_value, args=(y_coords,))
-    edges["X"] = list(
-        map(lambda x: [x[0], x[1]], list(zip(edges.X_sender, edges.X_to)))
-    )
-    edges["Y"] = list(
-        map(lambda x: [x[0], x[1]], list(zip(edges.Y_sender, edges.Y_to)))
-    )
-    edges = edges.drop(["sender", "to", "X_sender", "Y_sender", "X_to", "Y_to"], axis=1)
-
-    # CREATE EDGES PLOT
     def new_value(value: int) -> int:
         OldMin: int = edges.weight.min()
         OldMax: int = edges.weight.max()
@@ -344,8 +209,10 @@ def create_combined_plot(
     edges_plot: Figure,
     x_coords,
     y_coords,
+    range_color,
+    metric: str = "test_accuracy",
+    msg_type: str = "SEND-LAYERS",
 ) -> Figure:
-    # Stationary combined plot
     combined_plot: Figure = go.Figure(
         data=edges_plot.data + nodes_plot.data,
         frames=[
@@ -378,22 +245,11 @@ def create_combined_plot(
 
 
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    messages: DataFrame = pd.read_csv(config.experiment_path / r"message.csv")
-    inference: DataFrame = pd.read_csv(config.experiment_path / r"nn_inference.csv")
-    global metric
-    metric = "test_accuracy"
-    global msg_type
-    msg_type = "SEND-LAYERS"
-    x_coords, y_coords = create_coordinates(messages)
-    nodes = create_nodes_df(inference)
-    edges = create_edges_df(messages)
-    timestamps: List[float] = sorted(
-        list(set(nodes.timestamp.to_list() + edges.timestamp.to_list()))
-    )
-    nodes_plot: Figure = create_nodes_plot(nodes, timestamps, x_coords, y_coords)
-    edges_plot: Figure = create_edges_plot(edges, timestamps, x_coords, y_coords)
+    x_coords, y_coords = pre.create_network_coordinates()
+    range_color, nodes_plot = create_nodes_plot(x_coords, y_coords)
+    edges_plot: Figure = create_edges_plot(x_coords, y_coords)
     combined_plot: Figure = create_combined_plot(
-        nodes_plot, edges_plot, x_coords, y_coords
+        nodes_plot, edges_plot, x_coords, y_coords, range_color
     )
 
     figs: List[Figure] = [combined_plot, nodes_plot, edges_plot]
