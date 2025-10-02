@@ -6,8 +6,11 @@ from pandas.core.frame import DataFrame
 from pandas._libs.tslibs.timestamps import Timestamp
 from plotly.graph_objects import Figure
 from typing import List
+from tqdm import tqdm
+import time
 import preprocess as pre
-from export import Config, clean
+from export import Config
+from preprocess import clean
 
 config = Config()
 
@@ -113,21 +116,25 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
         return figs
 
     if action == "generate":
-        folder = f"figures/{__name__.split('.')[0]}"
+        folder = f"figures/{__name__.split('.')[-1]}"
         isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for fig in figs:
-            print(1)
+        for fig in tqdm(figs, desc="Downloading figures"):
             fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
     else:
-        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        folder = f"{config.output_path}/{__name__.split('.')[-1]}"
         isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for fig in figs:
+        for fig in tqdm(figs, desc="Downloading figures"):
             if len(fig.frames) > 0:
                 frame = fig.frames[-1]
                 fig.update(data=frame.data)
                 fig.layout.sliders[0].update(active=len(fig.frames) - 1)
-            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")
+            w, h = fig.layout.width, fig.layout.height
+            fig.write_image(
+                rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg",
+                width=w,
+                height=h,
+            )

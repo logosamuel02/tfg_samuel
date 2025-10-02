@@ -1,25 +1,50 @@
 import argparse
-from pydantic import FilePath
-from vis.analysis.export import Config
-import visualization as vis
+from export import Config
+from visualization import (
+    anova,
+    algorithm,
+    data_split,
+    messages,
+    convergence,
+    inference,
+    network,
+)
 
 
-def analyze(input: FilePath, output: FilePath, config_file: FilePath) -> None:
-    config = Config(source_path=input, output_path=output, plots=config_file)
-    vis.anova.generate(config=config, action="download")
-    vis.algorithm.generate(config=config, action="download")
-    vis.data_split.generate(config=config, action="download")
-    vis.messages.generate(config=config, action="download")
-    vis.convergence.generate(config=config, action="download")
-    vis.inference.generate(config=config, action="download")
-    vis.network.generate(config=config, action="download")
+def analyze(config: Config) -> None:
+    # anova.generate(config=config, action="download")
+    # algorithm.generate(config=config, action="download")
+    # data_split.generate(config=config, action="download")
+    # messages.generate(config=config, action="download")
+    # convergence.generate(config=config, action="download")
+    # inference.generate(config=config, action="download")
+    network.generate(config=config, action="download")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input")
-    parser.add_argument("-o", "--output")
-    parser.add_argument("-c", "--config_file")
+    parser = argparse.ArgumentParser(
+        description="Generate figures and download into .svg filetype"
+    )
+    parser.add_argument(
+        "-s",
+        "--source_path",
+        help="Path to the experiments folders to use the in multi-source data figures",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_path",
+        nargs="?",
+        default="images",
+        help="Where to store the downloaded images. Default: images",
+    )
+    parser.add_argument(
+        "-p",
+        "--plots",
+        nargs="?",
+        default="config_files/config.yaml",
+        help="Path to file with the configuration for figures",
+    )
 
     args = vars(parser.parse_args())
-    analyze(**args)
+    config = Config(**args)
+    analyze(config)

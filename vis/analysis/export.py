@@ -103,7 +103,6 @@ class Config:
     )
     experiment_path: DirectoryPath = field(init=False)
     output_path: str = "images"
-    fig_buttons: Dict = field(init=False)
     plots: str = "config_files/config.yaml"
     variables: str = r"config_files/variables.yaml"
     gif: Dict = field(init=False)
@@ -113,18 +112,6 @@ class Config:
         self.experiment_path: Path = (
             self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
         )
-        self.fig_buttons: Dict = dict(
-            dragmode="drawopenpath",
-            newshape_line_color="cyan",
-            modebar_add=[
-                "drawline",
-                "drawopenpath",
-                "drawclosedpath",
-                "drawcircle",
-                "drawrect",
-                "eraseshape",
-            ],
-        )
         with open(rf"{self.plots}", "r") as file:
             self.plots = yaml.load(file, Loader=yaml.SafeLoader)
 
@@ -132,3 +119,9 @@ class Config:
             self.variables = yaml.load(f, Loader=yaml.SafeLoader)
 
         self.gif = {"n_of_frames": 3, "frame_duration": 2}
+
+    def __getitem__(self, key):
+        return getattr(self, key)
+
+    def __setitem__(self, key):
+        return setattr(self, key)

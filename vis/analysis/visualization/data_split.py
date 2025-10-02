@@ -8,6 +8,8 @@ from matplotlib.colors import to_hex
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from typing import List, Dict
+from tqdm import tqdm
+import time
 import preprocess as pre
 from export import Config
 
@@ -21,7 +23,7 @@ def create_bubble_plots() -> List[Figure]:
     visible: bool = True
     for phase in phases:
         fig: Figure = go.Figure()
-        agents, labels, x, y, colores, sizes, texts = pre.bubble_interprocess()
+        agents, labels, x, y, colores, sizes, texts = pre.bubble_interprocess(phase)
         fig.add_trace(
             go.Scatter(
                 mode="markers+text",
@@ -75,21 +77,25 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
         return figs
 
     if action == "generate":
-        folder = f"figures/{__name__.split('.')[0]}"
+        folder = f"figures/{__name__.split('.')[-1]}"
         isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for fig in figs:
-            print(1)
+        for fig in tqdm(figs, desc="Downloading figures"):
             fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
     else:
-        folder = f"{config.output_path}/{__name__.split('.')[0]}"
+        folder = f"{config.output_path}/{__name__.split('.')[-1]}"
         isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for fig in figs:
+        for fig in tqdm(figs, desc="Downloading figures"):
             if len(fig.frames) > 0:
                 frame = fig.frames[-1]
                 fig.update(data=frame.data)
                 fig.layout.sliders[0].update(active=len(fig.frames) - 1)
-            fig.write_image(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg")
+            w, h = fig.layout.width, fig.layout.height
+            fig.write_image(
+                rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.svg",
+                width=w,
+                height=h,
+            )

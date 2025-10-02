@@ -1,26 +1,19 @@
 import os
+import re
 import pandas as pd
 import loaders as load
-from typing import List
 from more_itertools import sort_together
 from pandas.core.frame import DataFrame
 from plotly.graph_objects import Figure
 from pandas._libs.tslibs.timestamps import Timestamp
 from pandas._libs.tslibs.timedeltas import Timedelta
-import re
-import pandas as pd
 import numpy as np
+import numpy.typing as npt
 import scikit_posthocs as sp
 from pathlib import Path
-import plotly.express as px
-import pingouin as pg
-import plotly.figure_factory as ff
 from statsmodels.multivariate.manova import MANOVA
 from statsmodels.multivariate.multivariate_ols import MultivariateTestResults
-from pandas.core.frame import DataFrame
-from plotly.graph_objects import Figure
 from typing import List, Dict
-import numpy.typing as npt
 from itertools import groupby
 import branca.colormap as cm
 from matplotlib.colors import to_hex
@@ -197,7 +190,6 @@ def convergence_df() -> DataFrame:
     df: DataFrame = pd.read_csv(config.experiment_path / r"nn_convergence.csv")
     lst: List[str] = df.layer.unique()
     split_layer_str = lambda x: x.split(".")[0]
-    global layers_opts
     layers_opts = {
         split_layer_str(k): list(g)
         for k, g in groupby(sorted(lst, key=split_layer_str), key=split_layer_str)
@@ -232,7 +224,7 @@ def convergence_df() -> DataFrame:
         df_slicing["frame"] = index // N_UNIQUE_AGENTS
         df_indexed: DataFrame = pd.concat([df_indexed, df_slicing])
     config.layers_opts = layers_opts
-    return df_indexed
+    return layers_opts, df_indexed
 
 
 def bubble_colors():
@@ -270,7 +262,7 @@ def bubble_interprocess(phase: str = "train"):
     data = load.data_split_dataset()
     colors = bubble_colors()
     labels: List[str] = data.label.unique()
-    agents = sorted(data.agents.unique())
+    agents = sorted(data.agent.unique())
 
     X: npt.NDArray[np.int64] = np.zeros((len(labels) + 2, len(agents) + 2))
     for i, agent in enumerate(agents):
@@ -442,7 +434,7 @@ def create_nodes_df(metric: str = "test_accuracy") -> DataFrame:
 
 def create_network_artifacts():
     metric, nodes = create_nodes_df()
-    msg_type = edges = create_edges_df()
+    msg_type, edges = create_edges_df()
     timestamps: List[float] = sorted(
         list(set(nodes.timestamp.to_list() + edges.timestamp.to_list()))
     )
