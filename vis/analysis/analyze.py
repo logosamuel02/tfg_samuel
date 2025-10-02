@@ -12,12 +12,12 @@ from visualization import (
 
 
 def analyze(config: Config) -> None:
-    # anova.generate(config=config, action="download")
-    # algorithm.generate(config=config, action="download")
-    # data_split.generate(config=config, action="download")
-    # messages.generate(config=config, action="download")
-    # convergence.generate(config=config, action="download")
-    # inference.generate(config=config, action="download")
+    anova.generate(config=config, action="download")
+    algorithm.generate(config=config, action="download")
+    data_split.generate(config=config, action="download")
+    messages.generate(config=config, action="download")
+    convergence.generate(config=config, action="download")
+    inference.generate(config=config, action="download")
     network.generate(config=config, action="download")
 
 
