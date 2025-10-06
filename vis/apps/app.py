@@ -30,7 +30,9 @@ async def ANOVA(request):
 
 
 async def ALGORITHM(request):
-    return {"figures": algorithm.generate(config=config, download=False)}
+    figs = algorithm.generate(config=config, download=False)
+    figs.extend(messages.generate(config=config, download=False))
+    return {"figures": figs}
 
 
 async def DATA_SPLIT(request):
@@ -50,7 +52,11 @@ async def INFERENCE(request):
 
 
 async def NETWORK(request):
-    return {"figures": network.generate(config=config, download=False)}
+    figs = network.generate(config=config, download=False)
+    figs.extend(data_split.generate(config=config, download=False))
+    figs.extend(inference.generate(config=config, download=False))
+    figs = [figs[3], figs[0], figs[17], figs[14]]
+    return {"figures": figs}
 
 
 async def DOWNLOAD_SVG(request):

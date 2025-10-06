@@ -145,5 +145,5 @@ def generate(config: Config, download: bool = False) -> list[str] | None:
     f4: Figure = distribution_messages_types(dist_data)
     f5: Figure = distribution_info(dist_data)
     f6: Figure = distribution_info_type(dist_data)
-    figs: List[Figure] = [f0, f1, f2, f3, f4, f5, f6]
+    figs: List[Figure] = [f0, f5, f1, f2, f3, f4, f6]
     return save_or_print_figures(download, figs, __name__)

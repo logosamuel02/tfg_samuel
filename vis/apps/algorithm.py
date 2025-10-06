@@ -48,7 +48,7 @@ def violin_plot(data: DataFrame) -> Figure:
 
 
 def execution_time_plot(data: DataFrame) -> Figure:
-    # data: DataFrame = data[data.algorithm_round <= 100]
+    data: DataFrame = data[data.algorithm_round <= 100]
     data.timestamp = pd.to_datetime(data.timestamp)
     agents: List[str] = data.agent.unique()
     times = []

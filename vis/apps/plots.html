@@ -155,6 +155,7 @@
 
                 <div id="filter-target" class="row mt-3">
                     {% for title, figure in figures %}
+                    <div class="col-12 col-xl-6 mb-6">
                       <div class="card">
                         <h5 class="card-header">{{ title }}</h5>
                         <div class="card-body">
@@ -162,7 +163,8 @@
                             {{ figure|safe }}
                           </div>
                         </div>
-                      </div>       
+                      </div>
+                    </div>          
                     {% endfor %}
                 </div>
 
