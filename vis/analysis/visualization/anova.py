@@ -142,7 +142,7 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
     figs = [f1, f2, f3, f4, f5, f6, f7] + f8
 
     if action not in ["generate", "download"]:
-        return figs
+        return [[fig.layout.title.text, fig.to_html(full_html=False)] for fig in figs]
 
     if action == "generate":
         folder = f"figures/{__name__.split('.')[-1]}"

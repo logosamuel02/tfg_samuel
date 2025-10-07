@@ -74,7 +74,7 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
     figs: List[Figure] = create_bubble_plots()
 
     if action not in ["generate", "download"]:
-        return figs
+        return [[fig.layout.title.text, fig.to_html(full_html=False)] for fig in figs]
 
     if action == "generate":
         folder = f"figures/{__name__.split('.')[-1]}"
