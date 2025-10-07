@@ -212,7 +212,7 @@ def create_combined_plot(
     x_coords,
     y_coords,
     range_color,
-    metric: str = "test_accuracy",
+    metric: str = "accuracy",
     msg_type: str = "SEND-LAYERS",
 ) -> Figure:
     combined_plot: Figure = go.Figure(

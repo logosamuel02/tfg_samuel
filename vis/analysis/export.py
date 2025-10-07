@@ -103,7 +103,7 @@ class Config:
     )
     experiment_path: DirectoryPath = field(init=False)
     output_path: str = "images"
-    plots: str = "config_files/config.yml"
+    plots: str = r"config_files/config.yml"
     variables: str = r"config_files/variables.yml"
     gif: Dict = field(init=False)
 

@@ -418,10 +418,11 @@ def create_edges_df(msg_type: str = "SEND-LAYERS") -> DataFrame:
     return msg_type, edges
 
 
-def create_nodes_df(metric: str = "test_accuracy") -> DataFrame:
-    nodes: DataFrame = load.inference_dataset()
+def create_nodes_df(metric: str = "accuracy") -> DataFrame:
+    nodes: DataFrame = load.train_dataset()
+    nodes = nodes.rename(columns={"start_timestamp": "timestamp"})
+    nodes = nodes[nodes.epoch == 3]
     nodes = nodes[["agent", "timestamp", metric]]
-
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
     nodes["timestamp"] = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
