@@ -1,0 +1,278 @@
+{
+    "anova": {
+        "table_grouped": {
+            "layout": {
+                "template": "plotly_white",
+                "title_text": "Table of accuracy grouped by Distribution and Ann",
+                "width": 1000,
+                "height": 600
+            }
+        },
+        "interaction": {
+            "layout": {
+                "template": "seaborn"
+            }
+        },
+        "box": {
+            "layout": {
+                "template": "seaborn"
+            }
+        },
+        "anova": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "ANOVA table"
+            }
+        },
+        "tuckey": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Post-hoc Tuckey Test"
+            }
+        },
+        "nemenyi": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Post-hoc Nemenyi Test",
+                "coloraxis_colorscale": "Cividis"
+            }
+        },
+        "manova_inter": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "MANOVA table Intercept"
+            }
+        },
+        "manova_var": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "MANOVA table Variable"
+            }
+        }
+
+    },
+    
+    "algorithm": {
+        "violin": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Seconds to complete training round by agent"
+            },
+            "traces": {
+                "box_visible": true,
+                "meanline_visible": true
+            }
+        },
+        "bar": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Total execution time by agent"
+            },
+            "traces": {
+                "textfont_size": 12, 
+                "textangle": 0, 
+                "textposition": "outside", 
+                "cliponaxis": false
+            }
+        }
+    },
+
+    "data_split": {
+        "bubble": {
+            "layout": {
+                "template": "seaborn",
+                "plot_bgcolor": "rgb(256,256,256)"
+            },
+            "size_factors": {
+                "width": 143,
+                "height": 67,
+                "min_bubble_size": 20,
+                "max_bubble_size": 55
+            },
+            "axes": {
+                "showgrid": true,
+                "gridwidth": 1,
+                "gridcolor": "grey"
+            }
+        }
+
+    },
+
+    "messages": {
+        "heat_msg": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Total messages sent between agents"
+            }
+        },
+        "heat_info": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Information (MB) sent between agents"
+            }
+        },
+        "table_msg": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Statistics by message type"
+            }
+        },
+        "dist_msg": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Distribution of messages over time"
+            },
+            "traces":{
+                "marker_color":"green"
+            }
+        },
+        "dist_msg_type": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Distribution of messages over time by type"
+            }
+        },
+        "dist_info": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Distribution of information over time"
+            },
+            "traces":{
+                "marker_color":"indianred"
+            }
+        },
+        "dist_info_type": {
+            "layout": {
+                "template": "seaborn",
+                "title_text": "Distribution of information (Bytes) over time by message type"
+            }
+        }
+
+    },
+
+    "convergence": {
+        "xy_scatter": {
+            "layout": {
+                "template": "plotly_white"
+            }
+        },
+        "combined": {
+            "layout": {
+                "template": "plotly_white"
+            },
+            "traces": {
+                "line_width": 5,
+                "marker_size": 25
+            },
+            "xaxes": {
+                "title_font_size": 16, 
+                "linewidth": 2, 
+                "tickwidth": 2
+            },
+            "yaxes": {
+                "gridcolor": "#7a98cf", 
+                "griddash": "dot", 
+                "gridwidth": 0.5, 
+                "linewidth": 2, 
+                "tickwidth": 2
+            },
+            "updatemenus": {
+                "frame_duration": 120,
+                "transition_duration": 50,
+                "redraw": false
+            }
+        }
+    },
+
+    "inference": {
+        "train": {
+            "layout": {
+                "template": "seaborn"
+            }
+        },
+        "test": {
+            "layout": {
+                "template": "seaborn"
+            }
+        },
+        "train_test": {
+            "layout": {
+                "template": "seaborn"
+            },
+            "traces": {
+                "train_fillcolor": "rgba(0,176,246,0.2)",
+                "train_linecolor": "rgba(255,255,255,0)",
+                "test_fillcolor": "rgba(231,107,243,0.2)",
+                "test_linecolor": "rgba(255,255,255,0)",
+                "mean_train_linecolor": "rgb(0,176,246)",
+                "mean_test_linecolor": "rgb(231,107,243)"
+            }
+        }
+    },
+
+    "network": {
+        "nodes": {
+            "layout": {
+                "template": "plotly_white",
+                "coloraxis_colorbar_x": -0.15,
+                "width": 800,
+                "height": 800
+            },
+            "axes": {
+                "title": null,
+                "showgrid": false,
+                "zeroline": false,
+                "showticklabels": false
+            },
+            "traces": {
+                "textposition": "top center", 
+                "textfont_size": 17, 
+                "textfont_family": "Arial Black"
+            },
+            "other": {
+                "border": 0.07,
+                "marker_size": 35,
+                "frame_duration": 50
+            }
+        },
+        "edges": {
+            "layout": {
+                "template": "plotly_white",
+                "coloraxis_colorbar_x": -0.15,
+                "coloraxis_colorbar_title": "Test accuracy",
+                "width": 800,
+                "height": 800
+            },
+            "axes": {
+                "title": null,
+                "showgrid": false,
+                "zeroline": false,
+                "showticklabels": false
+            },
+            "traces": {
+                "textfont_size": 20
+            },
+            "other": {
+                "border": 0.07,
+                "marker_size": 35,
+                "frame_duration": 50,
+                "transition_duration": 25,
+                "max_size_lines": 20
+            }
+        },
+        "network": {
+            "layout": {
+                "template":"plotly_white"
+            },
+            "traces": {
+                "marker": {
+                    "size": 35, 
+                    "opacity": 1, 
+                    "line_color": "DarkSlateGrey"
+                }
+            }
+        }
+    }
+
+    
+}
