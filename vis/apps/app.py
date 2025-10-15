@@ -26,7 +26,9 @@ async def SETTINGS(request):
 
 
 async def ANOVA(request):
-    return {"figures": anova.generate(config=config, download=False)}
+    figs = anova.generate(config=config, download=False)
+    figs = [figs[0], figs[4], figs[1], figs[2], figs[3], figs[3]]
+    return {"figures": figs}
 
 
 async def ALGORITHM(request):
@@ -55,7 +57,7 @@ async def NETWORK(request):
     figs = network.generate(config=config, download=False)
     figs.extend(data_split.generate(config=config, download=False))
     figs.extend(inference.generate(config=config, download=False))
-    figs = [figs[3], figs[0], figs[17], figs[14]]
+    figs = [figs[3], figs[0], figs[6], figs[-3]]
     return {"figures": figs}
 
 
@@ -106,6 +108,11 @@ async def main():
     )
     dummy.web.add_menu_entry(
         "Download GIF", "/manager/plots/download_gif", "fa fa-arrow-down"
+    )
+
+    dummy.web.app.router.add_static(
+        "/manager/plots/rfLogo",
+        r"C:\Users\samue\OneDrive\Escritorio\Tareas UNI\tfg\tfg_samuel\vis\apps\rfLogo",
     )
 
     dummy.web.add_get(
