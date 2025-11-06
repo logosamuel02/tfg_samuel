@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+ </head>
+<body>
+<p id="demo">SOM</p>
+<form id="my-form" target="hiddenFrame"></form>
+<p id="title">1</p>
+<p id="figure">2</p>
+
+<iframe name="hiddenFrame" width="0" height="0" border="0" style="display: none;"></iframe>
+
+<script>
+
+states_dictionary={ 
+     "factor1":["distribution","harry"], 
+     "factor2":["ann","alex"], 
+     "level":["maximum_accuracy_achieved", "harry"]
+};
+
+async function getData(fig){
+    $.get("http://localhost:10000/manager/plots/anova/args_table", function(data) {
+    return data
+  }).catch((error) => {
+  $('#title').html("Loading...")
+  $('#figure').html("Loading...");
+  });
+  console.log("Received Figure")
+}
+// states_dictionary = getData("fig")
+// var f = document.createElement("form");
+var f = document.getElementById("my-form")
+
+//Create and append the options
+for (const parent in states_dictionary){
+  let textNode = document.createTextNode(parent); 
+  f.appendChild(textNode);
+  var selectList = document.createElement("select");
+  selectList.id = parent;
+  selectList.form = f.id
+  selectList.name = parent
+
+  document.write(parent)
+  for (const child in states_dictionary[parent]){
+    document.write(`\nop${child} ${states_dictionary[parent][child]}`)
+    var option = document.createElement("option");
+    option.value = states_dictionary[parent][child];
+    option.text = states_dictionary[parent][child];
+    selectList.appendChild(option)
+  }
+  // document.body.insertBefore(selectList, currentDiv);
+  f.appendChild(selectList)
+}
+// var x = document.createElement("BUTTON");
+// x.id = "gen_button"
+// x.innerHTML = "Generate"
+// x.form = "my-form"
+// x.method = "post"
+// x.onclick = function() {set_figure("figure")}
+// f.appendChild(x)
+var s = document.createElement("input"); //input element, Submit button
+s.setAttribute('type',"submit");
+s.setAttribute('id',"sub");
+s.setAttribute('value',"Submit");
+f.appendChild(s)
+
+// async function sendData(fig) {
+//   // Construct a FormData instance
+//   const formData = document.getElementById("my-form")
+
+//   try {
+//     const response = await fetch("http://localhost:10000/manager/plots/anova/figure", {
+//       method: "POST",
+//       // Set the FormData instance as the request body
+//       body: formData,
+//     });
+//     console.log(await response.json());
+//     response_json = await response.json()
+//     document.getElementById("title").innerHTML = response_json
+//     document.getElementById("figure").innerHTML = response_json
+//   } catch (e) {
+//     console.error(e);
+//     document.getElementById("title").innerHTML = "Loading..."
+//     document.getElementById("figure").innerHTML = "Loading..."
+//   }
+// }
+
+
+async function sendData(fig){
+    $.post("http://localhost:10000/manager/plots/anova/figure", function(data) {
+    $('#title').html(data)
+    $('#figure').html(data)
+  }).catch((error) => {
+  $('#title').html("Loading...")
+  $('#figure').html("Loading...");
+  });
+  console.log("Received Figure")
+}
+
+
+// const send = document.querySelector("#sub");
+// send.addEventListener("click", sendData);
+form = document.querySelector("#my-form");
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  sendData("figure");
+});
+
+</script>
+
+
+
+
+</body>
+</html>

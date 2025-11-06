@@ -1,0 +1,80 @@
+# algorithm:
+#   bar:
+    
+#   violin:
+   
+anova:
+  anova:
+    factor1:
+      - algorithm
+      - algorithm_rounds
+      - consensus_iterations
+      - training_epochs
+      - dataset
+      - distribution
+      - ann
+    factor2:
+      - algorithm
+      - algorithm_rounds
+      - consensus_iterations
+      - training_epochs
+      - dataset
+      - distribution
+      - ann
+    level:
+      - minimum_loss_achieved
+      - maximum_accuracy_achieved
+      - maximum_recall_achieved
+      - maximum_precision_achieved
+      - maximum_f1_achieved
+      - mean_seconds_by_round
+#   box:
+   
+#   interaction:
+   
+#   manova_inter:
+  
+#   manova_var:
+    
+#   nemenyi:
+   
+#   table_grouped:
+   
+#   tuckey:
+    
+# convergence:
+#   combined:
+   
+#   xy_scatter:
+   
+# data_split:
+#   bubble:
+
+# inference:
+#   test:
+    
+#   train:
+
+#   train_test:
+    
+# messages:
+#   dist_info:
+    
+#   dist_info_type:
+
+#   dist_msg:
+
+#   dist_msg_type:
+
+#   heat_info:
+
+#   heat_msg:
+  
+# network:
+
+#   edges:
+    
+#   network:
+   
+#   nodes:
+   

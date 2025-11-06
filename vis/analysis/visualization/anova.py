@@ -16,6 +16,14 @@ from preprocess import clean
 config: Config = Config()
 
 
+def actualize_figure(fig):
+    folder = f"figures/{__name__.split('.')[-1]}"
+    isExist: bool = os.path.exists(folder)
+    if not isExist:
+        os.makedirs(folder)
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+
+
 def create_atable_fig() -> Figure:
     atable = pre.anova_table()
     atable.columns = [clean(var) for var in atable.columns]
@@ -75,6 +83,7 @@ def create_anova(
     factor1: str = "distribution",
     factor2: str = "ann",
     level: str = "maximum_accuracy_achieved",
+    **karg,
 ) -> Figure:
     df = pre.df_anova()
     atable: DataFrame = pg.anova(
@@ -87,6 +96,7 @@ def create_anova(
     atable_c.columns = [clean(var) for var in atable_c.columns]
     fig: Figure = ff.create_table(atable_c)
     fig.update_layout(config.plots["anova"]["anova"]["layout"])
+    actualize_figure(fig)
     return fig
 
 
@@ -149,7 +159,7 @@ def generate(config: Config, action: str = "generate") -> list[str] | None:
         isExist: bool = os.path.exists(folder)
         if not isExist:
             os.makedirs(folder)
-        for fig in tqdm(figs, desc="Downloading figures"):
+        for fig in tqdm(figs, desc="Generating figures"):
             fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
     else:
         folder = f"{config.output_path}/{__name__.split('.')[-1]}"

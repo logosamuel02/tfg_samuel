@@ -14,6 +14,12 @@ import io
 load_dotenv()
 
 
+def load_parameters(filename: str = r"config_files/parameters.yml"):
+    with open(rf"{filename}", "r") as file:
+        pams = yaml.load(file, Loader=yaml.SafeLoader)
+    return pams
+
+
 def load_figure(filename: str):
     return pio.read_json(filename)
 
@@ -41,6 +47,19 @@ def get_module_figures(module: str):
         html_fig = html_fig.replace("png", "svg", 3)
         html_tuples.append([title, html_fig])
     return html_tuples
+
+
+def get_figure(filename: str):
+    try:
+        print("trying")
+        fig = load_figure(filename)
+    except FileNotFoundError:
+        return ["Loading...", "Loading..."]
+    title: str = fig.layout.title.text
+    html_fig: str = fig.to_html(full_html=False)
+    html_fig = html_fig.replace("PNG", "SVG", 1)
+    html_fig = html_fig.replace("png", "svg", 3)
+    return title, html_fig
 
 
 def download_figures(

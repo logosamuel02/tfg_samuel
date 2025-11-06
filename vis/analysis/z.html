@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    .no_disp {
+      display: none;
+    }
+  </style>
+<body>
+
+<form id="fo">
+<label for="tentacles">Seconds to reload:</label>
+<input type="number" id="tentacles" value="5" name="tentacles" min="1" max="1000000" />
+<button type="button" onclick="make_alert();">Click Me!</button>
+</form>
+
+
+<p id="demo"></p>
+
+<script>
+
+let reload_interval = document.getElementById("demo").value;
+async function make_alert() {
+  reload_interval = document.getElementById("tentacles").value;
+  // alert(`Reload changed to ${window.reload}`)
+  document.getElementById("demo").innerHTML = `HOLA ${reload_interval}`;
+}
+
+document.write(document.getElementById("demo").value)
+
+</script>
+
+</body>
+</html>
