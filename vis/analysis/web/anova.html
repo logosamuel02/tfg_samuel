@@ -220,20 +220,20 @@
                 <h1 class="h2">Plots</h1>
                 Reload figures
                 <label class="switch">
-                  <input type="checkbox" id="reload" value="Hola" onclick="reload();">
+                  <input type="checkbox" id="reload_cb" value="Hola" onclick="reload();">
                   <span class="slider round" id="sl1"></span>
                 </label>
 
                 <div>
                   <form id="fo">
                   <label for="tentacles">Seconds to reload:</label>
-                  <input type="number" id="tentacles" value="5" name="uno" min="1" max="1000000" />
+                  <input type="number" id="reload_input" value="5" name="uno" min="1" max="1000000" />
                   </form>
                 </div>
 <!-- Regenerate -->
                 Regenerate figures
                 <label class="switch">
-                  <input type="checkbox" id="regen" value="Hola" onclick="regenerate();">
+                  <input type="checkbox" id="regen_cb" value="Hola" onclick="regenerate();">
                   <span class="slider round" id="sl2"></span>
                 </label>
                 <div>
@@ -252,7 +252,7 @@
                       <div class="card">
                         <h5 class="card-header" id="title"></h5>
                         <div class="plotly-chart">
-                          <form id="my-form" target="hiddenFrame"></form>
+                          <form id="form1" target="hiddenFrame"></form>
                         </div>
                         <div class="card-body">
                           <div class="plotly-chart" id="figure">
@@ -297,133 +297,6 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 </body>
 
-<script>
-
-window.onload = function() {
-var num = document.querySelector("#tentacles")
-var span = document.querySelector("#sl1")
-num.addEventListener("input", function() {
-  if (num.value >= 1 && num.value <= 100000){
-    $('#reload').prop('disabled', false);
-    // span.style.background='#ccc';
-  }
-  else {
-    $('#reload').prop('disabled', true);
-    // span.style.background="#FF370F";
-  }
-});
-};  
-
-console.log()
-
-async function set_loaded_figure(fig){
-    $.get(`http://localhost:10000/manager/plots/anova/${fig}`, function(data) {
-    $('#title').html(data[0])
-    $('#figure').html(data[1])
-  }).catch((error) => {
-  $('#figure').html(error);
-  });
-  console.log("GET CALL")
-}
-
-async function reload(){
-  if (document.getElementById('reload').checked) 
-  {
-      $('#tentacles').prop('disabled', true);
-      if (typeof myInterval !== 'undefined') {
-        clearInterval(myInterval)
-      }
-      console.log("Reload ON");
-      set_loaded_figure("table")
-      window.myInterval = setInterval(function() { set_loaded_figure("table"); }, Number(document.getElementById("tentacles").value)*1000);
-
-  }
-  else {
-    $('#tentacles').prop('disabled', false);
-    console.log("Reload OFF")
-    if (typeof myInterval !== 'undefined') {
-        clearInterval(myInterval)
-      };
-  }
-}
-
-async function regenerate(){
-  if (document.getElementById('regen').checked) 
-  {
-      $('#regen_input').prop('disabled', true);
-      if (typeof myInterval2 !== 'undefined') {
-        clearInterval(myInterval2)
-      }
-      console.log("Regenerate ON");
-      set_generate_figure("figure")
-      window.myInterval2 = setInterval(function() { set_generate_figure("figure"); }, Number(document.getElementById("tentacles").value)*1000);
-
-  }
-  else {
-    $('#regen_input').prop('disabled', false);
-    console.log("Regenerate OFF")
-    if (typeof myInterval2 !== 'undefined') {
-        clearInterval(myInterval2)
-      };
-  }
-}
-
-async function set_form_arguments(fig){
-    $.get("http://localhost:10000/manager/plots/anova/args_table", function(data) {
-    console.log("Finished: get args to generate")
-     var f = document.getElementById("my-form")
-    //Create and append the options
-    for (const parent in data){
-      let textNode = document.createTextNode(parent); 
-      f.appendChild(textNode);
-      var selectList = document.createElement("select");
-      selectList.id = parent;
-      selectList.form = f.id
-      selectList.name = parent
-
-      for (const child in data[parent]){
-        var option = document.createElement("option");
-        option.value = data[parent][child];
-        option.text = data[parent][child];
-        selectList.appendChild(option)
-      }
-      f.appendChild(selectList)
-      linebreak = document.createElement("br");
-      f.appendChild(linebreak);
-    }
-    var s = document.createElement("input"); //input element, Submit button
-    s.setAttribute('type',"submit");
-    s.setAttribute('id',"sub");
-    s.setAttribute('value',"Generate");
-    f.appendChild(s)
-  }).catch((error) => {
-  console.log(error)
-  });
-  console.log("Start: get args to generate")
-}
-
-async function set_generate_figure(fig){
-    $.post("http://localhost:10000/manager/plots/anova/figure", $('#my-form').serialize(), function(data) {
-      console.log("Finished: set_generate_figure to generate")
-    $('#title').html(data[0])
-    $('#figure').html(data[1])
-  }).catch((error) => {
-  $('#figure').html("Any of the selected attributes is invalid.");
-  });
-  console.log("Start: set_generate_figure to generate")
-}
-
-
-set_loaded_figure("table")
-set_generate_figure("figure")
-set_form_arguments("fig")
-
-form = document.querySelector("#my-form");
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  set_generate_figure("figure");
-});
-
-</script>
+<script src="web/app.js"></script>
 
 </html>

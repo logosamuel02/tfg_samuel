@@ -101,10 +101,15 @@ async def main():
         r"C:\Users\samue\OneDrive\Escritorio\Tareas UNI\tfg\tfg_samuel\vis\analysis\rfLogo",
     )
 
+    dummy.web.app.router.add_static(
+        "/manager/plots/web",
+        r"C:\Users\samue\OneDrive\Escritorio\Tareas UNI\tfg\tfg_samuel\vis\analysis\web",
+    )
+
     dummy.web.add_get(
         "/manager/plots/anova",
         ANOVA,
-        template="anova.html",
+        template="web/anova.html",
     )
 
     dummy.web.add_get(
