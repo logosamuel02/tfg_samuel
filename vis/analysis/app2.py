@@ -25,20 +25,41 @@ async def ANOVA(request):
     return
 
 
+async def ARGS_TUCKEY(request):
+    pams = load_parameters()
+    print("Arguments sent")
+    return pams["anova"]["tuckey"]
+
+
+async def GET_TUCKEY(request):
+    config = Config()
+    filename = config.plots["anova"]["tuckey"]["layout"]["title_text"]
+    filename = rf"figures/anova/{filename.replace(' ', '_')}.json"
+    return get_figure(filename)
+
+
+async def GEN_TUCKEY(request):
+    form = await request.post()
+    form = dict(form)
+    fig = anova.create_tuckey_test(**form)
+    print("Figure generated sent")
+    return fig.layout.title.text, fig.to_html(full_html=False)
+
+
 async def ARGS_ANOVA_TABLE(request):
     pams = load_parameters()
     print("Arguments sent")
     return pams["anova"]["anova"]
 
 
-async def ANOVA_TABLE(request):
+async def GET_ANOVA_TABLE(request):
     config = Config()
     filename = config.plots["anova"]["anova"]["layout"]["title_text"]
     filename = rf"figures/anova/{filename.replace(' ', '_')}.json"
     return get_figure(filename)
 
 
-async def ANOVA_FIGURE(request):
+async def GEN_ANOVA_TABLE(request):
     form = await request.post()
     form = dict(form)
     fig = anova.create_anova(**form)
@@ -113,18 +134,34 @@ async def main():
     )
 
     dummy.web.add_get(
-        "/manager/plots/anova/table",
-        ANOVA_TABLE,
+        "/manager/plots/anova/get_tuckey",
+        GET_TUCKEY,
         template=None,
     )
     dummy.web.add_get(
-        "/manager/plots/anova/args_table",
+        "/manager/plots/anova/args_tuckey",
+        ARGS_TUCKEY,
+        template=None,
+    )
+    dummy.web.add_post(
+        "/manager/plots/anova/gen_tuckey",
+        GEN_TUCKEY,
+        template=None,
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/anova/get_anova_table",
+        GET_ANOVA_TABLE,
+        template=None,
+    )
+    dummy.web.add_get(
+        "/manager/plots/anova/args_anova_table",
         ARGS_ANOVA_TABLE,
         template=None,
     )
     dummy.web.add_post(
-        "/manager/plots/anova/figure",
-        ANOVA_FIGURE,
+        "/manager/plots/anova/gen_anova_table",
+        GEN_ANOVA_TABLE,
         template=None,
     )
 

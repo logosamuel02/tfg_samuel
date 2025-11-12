@@ -40,7 +40,22 @@ anova:
    
 #   table_grouped:
    
-#   tuckey:
+  tuckey:
+    factor:
+      - algorithm
+      - algorithm_rounds
+      - consensus_iterations
+      - training_epochs
+      - dataset
+      - distribution
+      - ann
+    level:
+      - minimum_loss_achieved
+      - maximum_accuracy_achieved
+      - maximum_recall_achieved
+      - maximum_precision_achieved
+      - maximum_f1_achieved
+      - mean_seconds_by_round
     
 # convergence:
 #   combined:

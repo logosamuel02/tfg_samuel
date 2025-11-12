@@ -139,6 +139,21 @@ You can use -h to see arguments meaning.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+## Expand visualization module
+
+Here we detail the steps to add one plot to the web interface.
+
+1. (Recommended) Define a function to preprocess your plot and add it to [preprocess.py](/vis/analysis/preprocess.py)
+
+2. Define a function to create your plotly plot and add it to [preprocess.py](/vis/analysis/visualization/extra.py)
+
+3. (Optional) Add to [config.yml](/vis/analysis/config_files/config.yml) the customized options that can take your plot. This options go with the step two, and it is usefull only if you want to change some parameter or option of the plot directly from the YAML file, if not this step is not necessary.
+
+4. Now, on [app2.py](/vis/analysis/app2.py) you must create 3 functions, to load figure, generate figure and load arguments. (Maybe you plot does not have args, but create it returing it to True). And fill [parameters.yml](/vis/analysis/config_files/parameters.yml) with the argumetnts of the plot.
+
+5. Link these functions with the routes for the dummy agent.
+
+6. Add the name of the plot root to one of the html module lists.
 
 <!-- USAGE EXAMPLES -->
 ## Usage

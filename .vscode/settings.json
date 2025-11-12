@@ -3,6 +3,6 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "livePreview.defaultPreviewPath": "/vis/apps/caller.html"
+    "livePreview.defaultPreviewPath": "/vis/analysis/web/anova.html"
 }
 

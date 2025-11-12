@@ -1,11 +1,13 @@
-async function set_loaded_figure(fig, title, plot){
-    $.get(`http://localhost:10000/manager/plots/anova/${fig}`, function(data) {
-    $(`#${title}`).html(data[0])
-    $(`#${plot}`).html(data[1])
-  }).catch((error) => {
-  $(`#${plot}`).html(error);
-  });
-  console.log("GET CALL")
+async function load_all_figures() {
+  for (var plot_string of window.plots){
+    load_figure(plot_string)
+}
+}
+
+async function generate_all_figures() {
+  for (var plot_string of window.plots){
+    load_figure(plot_string)
+}
 }
 
 async function reload(){
@@ -16,8 +18,8 @@ async function reload(){
         clearInterval(myInterval)
       }
       console.log("Reload ON");
-      set_loaded_figure("table")
-      window.myInterval = setInterval(function() { set_loaded_figure("table"); }, Number(document.getElementById("reload_input").value)*1000);
+      load_all_figures()
+      window.myInterval = setInterval(function() { load_all_figures(); }, Number(document.getElementById("reload_input").value)*1000);
 
   }
   else {
@@ -37,8 +39,8 @@ async function regenerate(){
         clearInterval(myInterval2)
       }
       console.log("Regenerate ON");
-      set_generate_figure("figure")
-      window.myInterval2 = setInterval(function() { set_generate_figure("figure"); }, Number(document.getElementById("reload_input").value)*1000);
+      generate_all_figures()
+      window.myInterval2 = setInterval(function() { generate_all_figures(); }, Number(document.getElementById("reload_input").value)*1000);
 
   }
   else {
@@ -50,16 +52,27 @@ async function regenerate(){
   }
 }
 
-async function set_form_arguments(args, form){
-    $.get(`http://localhost:10000/manager/plots/anova/${args}`, function(data) {
-    console.log("Finished: get args to generate")
-     var f = document.getElementById(form)
+async function load_figure(plot){
+    $.get(`http://localhost:10000/manager/plots/anova/get_${plot}`, function(data) {
+    // console.log(`Finish: get_${plot}`)
+    $(`#title_${plot}`).html(data[0])
+    $(`#figure_${plot}`).html(data[1])
+  }).catch((error) => {
+  $(`#figure_${plot}`).html(error);
+  });
+  // console.log(`Start: get_${plot}`)
+}
+
+async function load_arguments(plot){
+    $.get(`http://localhost:10000/manager/plots/anova/args_${plot}`, function(data) {
+    // console.log(`Finished: args_${plot}`)
+     var f = document.getElementById(`form_${plot}`)
     //Create and append the options
     for (const parent in data){
       let textNode = document.createTextNode(parent); 
       f.appendChild(textNode);
       var selectList = document.createElement("select");
-      selectList.id = parent;
+      selectList.id = `${parent}_${plot}`;
       selectList.form = f.id
       selectList.name = parent
 
@@ -75,33 +88,73 @@ async function set_form_arguments(args, form){
     }
     var s = document.createElement("input"); //input element, Submit button
     s.setAttribute('type',"submit");
-    s.setAttribute('id',"sub");
+    s.setAttribute('id',`sub_${plot}`);
     s.setAttribute('value',"Generate");
     f.appendChild(s)
   }).catch((error) => {
   console.log(error)
   });
-  console.log("Start: get args to generate")
+  // console.log(`Start: args_${plot}`)
 }
 
-async function set_generate_figure(fig, form, title, plot){
-    $.post(`http://localhost:10000/manager/plots/anova/${fig}`, $(`#${form}`).serialize(), function(data) {
-      console.log("Finished: set_generate_figure to generate")
-    $(`#${title}`).html(data[0])
-    $(`#${plot}`).html(data[1])
+async function generate_figure(plot){
+    $.post(`http://localhost:10000/manager/plots/anova/gen_${plot}`, $(`#form_${plot}`).serialize(), function(data) {
+      // console.log(`Finished: gen_${plot}`)
+    $(`#title_${plot}`).html(data[0])
+    $(`#figure_${plot}`).html(data[1])
   }).catch((error) => {
-  $(`#${plot}`).html("Any of the selected attributes is invalid.");
+  $(`#figure_${plot}`).html("Any of the selected attributes is invalid.");
   });
-  console.log("Start: set_generate_figure to generate")
+  // console.log(`Start: gen_${plot}`)
 }
 
-async function form_sender(form, figure) {
-    form = document.querySelector(`#${form}`);
+async function send_form(plot) {
+    form = document.querySelector(`#form_${plot}`);
     form.addEventListener("submit", (event) => {
         event.preventDefault();
-        set_generate_figure(figure);
+        generate_figure(plot);
         });   
 }
+
+const create_containers = (plots) => {
+    var containers = []
+  for (const plot of plots){
+    console.log(plot)
+    let container = "";
+	container += `<div id=\"filter-target-${plot}\" class=\"row mt-3\">\n`;
+	container += "\t  <div class=\"card\">\n";
+	container += `\t\t<h5 class=\"card-header\" id=\"title_${plot}\"></h5>\n`;
+	container += "\t\t<div class=\"plotly-chart\">\n";
+	container += `\t\t  <form id=\"form_${plot}\" target=\"hiddenFrame\"></form>\n`;
+	container += "\t\t</div>\n";
+	container += "\t\t<div class=\"card-body\">\n";
+	container += `\t\t  <div class=\"plotly-chart\" id=\"figure_${plot}\">\n`;
+	container += "\t\t  </div>\n";
+	container += "\t\t</div>\n";
+	container += "\t  </div>\t   \n";
+	container += "</div>\n";
+  containers.push(container)
+  }
+  console.log("Finish: created containers")
+	return containers.join(" ");
+}
+
+var plots = ["anova_table", "tuckey"] 
+
+// Create containers
+var containers = create_containers(window.plots)
+document.getElementById("card_containers").innerHTML = containers;
+
+// Set up initial calls to load and generate figures
+for (var plot of window.plots){
+  load_figure(plot)
+  load_arguments(plot)
+  generate_figure(plot)
+  send_form(plot)
+  console.log(`Calls for ${plot}`)
+}
+
+
 
 window.onload = function() {
 var num = document.querySelector("#reload_input")
@@ -116,11 +169,4 @@ num.addEventListener("input", function() {
     // span.style.background="#FF370F";
   }
 });
-};  
-
-console.log()
-
-set_loaded_figure("table", "title", "figure")
-set_generate_figure("figure", "form1", "title", "figure")
-set_form_arguments("args_table", "form1")
-form_sender("form1", "figure")
+};
