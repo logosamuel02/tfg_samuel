@@ -1,0 +1,193 @@
+summary_atable:
+  filename: Grouped table by level
+  layout:
+    height: 600
+    template: plotly_white
+    title_text: Table of accuracy grouped by Distribution and Ann
+    width: 1000
+
+anova_table:
+  filename: ANOVA Table
+  layout:
+    template: seaborn
+    title_text: ANOVA table
+
+interaction_plot:
+  filename: Interaction plot
+  layout:
+    template: seaborn
+
+bar:
+  filename: title
+  layout:
+    template: seaborn
+    title_text: Total execution time by agent
+  traces:
+    cliponaxis: false
+    textangle: 0
+    textfont_size: 12
+    textposition: outside
+violin:
+  layout:
+    template: seaborn
+    title_text: Seconds to complete training round by agent
+  traces:
+    box_visible: true
+    meanline_visible: true
+box:
+  layout:
+    template: seaborn
+
+manova_inter:
+  layout:
+    template: seaborn
+    title_text: MANOVA table Intercept
+manova_var:
+  layout:
+    template: seaborn
+    title_text: MANOVA table Variable
+nemenyi:
+  layout:
+    coloraxis_colorscale: Cividis
+    template: seaborn
+    title_text: Post-hoc Nemenyi Test
+tuckey:
+  layout:
+    template: seaborn
+    title_text: Post-hoc Tuckey Test
+
+combined:
+  layout:
+    template: plotly_white
+  traces:
+    line_width: 5
+    marker_size: 25
+  updatemenus:
+    frame_duration: 120
+    redraw: false
+    transition_duration: 50
+  xaxes:
+    linewidth: 2
+    tickwidth: 2
+    title_font_size: 16
+  yaxes:
+    gridcolor: '#7a98cf'
+    griddash: dot
+    gridwidth: 0.5
+    linewidth: 2
+    tickwidth: 2
+xy_scatter:
+  layout:
+    template: plotly_white
+
+bubble:
+  axes:
+    gridcolor: grey
+    gridwidth: 1
+    showgrid: true
+  layout:
+    plot_bgcolor: rgb(256,256,256)
+    template: seaborn
+  size_factors:
+    height: 67
+    max_bubble_size: 55
+    min_bubble_size: 20
+    width: 143
+
+test:
+  layout:
+    template: seaborn
+train:
+  layout:
+    template: seaborn
+train_test:
+  layout:
+    template: seaborn
+  traces:
+    mean_test_linecolor: rgb(231,107,243)
+    mean_train_linecolor: rgb(0,176,246)
+    test_fillcolor: rgba(231,107,243,0.2)
+    test_linecolor: rgba(255,255,255,0)
+    train_fillcolor: rgba(0,176,246,0.2)
+    train_linecolor: rgba(255,255,255,0)
+
+dist_info:
+  layout:
+    template: seaborn
+    title_text: Distribution of information over time
+  traces:
+    marker_color: indianred
+dist_info_type:
+  layout:
+    template: seaborn
+    title_text: Distribution of information (Bytes) over time by message type
+dist_msg:
+  layout:
+    template: seaborn
+    title_text: Distribution of messages over time
+  traces:
+    marker_color: green
+dist_msg_type:
+  layout:
+    template: seaborn
+    title_text: Distribution of messages over time by type
+heat_info:
+  layout:
+    template: seaborn
+    title_text: Information (MB) sent between agents
+heat_msg:
+  layout:
+    template: seaborn
+    title_text: Total messages sent between agents
+table_msg:
+  layout:
+    template: seaborn
+    title_text: Statistics by message type
+
+edges:
+  axes:
+    showgrid: false
+    showticklabels: false
+    title: null
+    zeroline: false
+  layout:
+    coloraxis_colorbar_title: Test accuracy
+    coloraxis_colorbar_x: -0.15
+    height: 800
+    template: plotly_white
+    width: 800
+  other:
+    border: 0.07
+    frame_duration: 50
+    marker_size: 35
+    max_size_lines: 20
+    transition_duration: 25
+  traces:
+    textfont_size: 20
+network:
+  layout:
+    template: plotly_white
+  traces:
+    marker:
+      line_color: DarkSlateGrey
+      opacity: 1
+      size: 35
+nodes:
+  axes:
+    showgrid: false
+    showticklabels: false
+    title: null
+    zeroline: false
+  layout:
+    coloraxis_colorbar_x: -0.15
+    height: 800
+    template: plotly_white
+    width: 800
+  other:
+    border: 0.07
+    frame_duration: 50
+    marker_size: 35
+  traces:
+    textfont_family: Arial Black
+    textfont_size: 17
+    textposition: top center

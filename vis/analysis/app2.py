@@ -6,17 +6,10 @@ from spade import wait_until_finished
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
 
-import visualization
+from visualization import plots
 
-from visualization import anova
-from visualization import algorithm
-from visualization import data_split
-from visualization import messages
-from visualization import convergence
-from visualization import inference
-from visualization import network
 
-from export import Config, get_figure, load_parameters
+from export import Config, get_figure, load_parameters, load_functions
 
 config = Config()
 
@@ -25,70 +18,62 @@ async def ANOVA(request):
     return
 
 
-async def ARGS_TUCKEY(request):
+async def GET_ARGS(request):
+    form = await request.post()
+    form = list(form)[0]
+    print("args", form)
     pams = load_parameters()
-    print("Arguments sent")
-    return pams["anova"]["tuckey"]
+    return pams[form]
 
 
-async def GET_TUCKEY(request):
+async def GET_FIGURE(request):
+    form = await request.post()
+    form = list(form)[0]
+    print("get", form)
     config = Config()
-    filename = config.plots["anova"]["tuckey"]["layout"]["title_text"]
+    filename = config.plots[form]["filename"]
     filename = rf"figures/anova/{filename.replace(' ', '_')}.json"
     return get_figure(filename)
 
 
-async def GEN_TUCKEY(request):
+async def GEN_FIGURE(request):
     form = await request.post()
     form = dict(form)
-    fig = anova.create_tuckey_test(**form)
-    print("Figure generated sent")
-    return fig.layout.title.text, fig.to_html(full_html=False)
-
-
-async def ARGS_ANOVA_TABLE(request):
-    pams = load_parameters()
-    print("Arguments sent")
-    return pams["anova"]["anova"]
-
-
-async def GET_ANOVA_TABLE(request):
+    print("gen", form)
     config = Config()
-    filename = config.plots["anova"]["anova"]["layout"]["title_text"]
-    filename = rf"figures/anova/{filename.replace(' ', '_')}.json"
-    return get_figure(filename)
+    filename = config.plots[form["name"]]["filename"]
+    pams = load_functions()
+    gen_func = getattr(plots, pams[form["name"]])
+    try:
+        fig = gen_func(**form)
+        return filename, fig.to_html(full_html=False)
+    except Exception as e:
+        print(e)
+        return filename, "Some of the attributes selected is not valid"
 
 
-async def GEN_ANOVA_TABLE(request):
-    form = await request.post()
-    form = dict(form)
-    fig = anova.create_anova(**form)
-    print("Figure generated sent")
-    return fig.layout.title.text, fig.to_html(full_html=False)
+# async def ALGORITHM(request):
+#     return {"figures": algorithm.generate(config=config, action="return")}
 
 
-async def ALGORITHM(request):
-    return {"figures": algorithm.generate(config=config, action="return")}
+# async def DATA_SPLIT(request):
+#     return {"figures": data_split.generate(config=config, action="return")}
 
 
-async def DATA_SPLIT(request):
-    return {"figures": data_split.generate(config=config, action="return")}
+# async def MESSAGES(request):
+#     return {"figures": messages.generate(config=config, action="return")}
 
 
-async def MESSAGES(request):
-    return {"figures": messages.generate(config=config, action="return")}
+# async def CONVERGENCE(request):
+#     return {"figures": convergence.generate(config=config, action="return")}
 
 
-async def CONVERGENCE(request):
-    return {"figures": convergence.generate(config=config, action="return")}
+# async def INFERENCE(request):
+#     return {"figures": inference.generate(config=config, action="return")}
 
 
-async def INFERENCE(request):
-    return {"figures": inference.generate(config=config, action="return")}
-
-
-async def NETWORK(request):
-    return {"figures": network.generate(config=config, action="return")}
+# async def NETWORK(request):
+#     return {"figures": network.generate(config=config, action="return")}
 
 
 class DummyAgent(Agent):
@@ -133,35 +118,19 @@ async def main():
         template="web/anova.html",
     )
 
-    dummy.web.add_get(
-        "/manager/plots/anova/get_tuckey",
-        GET_TUCKEY,
-        template=None,
-    )
-    dummy.web.add_get(
-        "/manager/plots/anova/args_tuckey",
-        ARGS_TUCKEY,
+    dummy.web.add_post(
+        "/manager/plots/anova/get_figure",
+        GET_FIGURE,
         template=None,
     )
     dummy.web.add_post(
-        "/manager/plots/anova/gen_tuckey",
-        GEN_TUCKEY,
-        template=None,
-    )
-
-    dummy.web.add_get(
-        "/manager/plots/anova/get_anova_table",
-        GET_ANOVA_TABLE,
-        template=None,
-    )
-    dummy.web.add_get(
-        "/manager/plots/anova/args_anova_table",
-        ARGS_ANOVA_TABLE,
+        "/manager/plots/anova/get_args",
+        GET_ARGS,
         template=None,
     )
     dummy.web.add_post(
-        "/manager/plots/anova/gen_anova_table",
-        GEN_ANOVA_TABLE,
+        "/manager/plots/anova/generate_figure",
+        GEN_FIGURE,
         template=None,
     )
 

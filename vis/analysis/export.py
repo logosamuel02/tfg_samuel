@@ -20,6 +20,20 @@ def load_parameters(filename: str = r"config_files/parameters.yml"):
     return pams
 
 
+def load_functions(filename: str = r"config_files/functions.yml"):
+    with open(rf"{filename}", "r") as file:
+        pams = yaml.load(file, Loader=yaml.SafeLoader)
+    return pams
+
+
+def actualize_figure(fig):
+    folder = f"figures/{__name__.split('.')[-1]}"
+    isExist: bool = os.path.exists(folder)
+    if not isExist:
+        os.makedirs(folder)
+    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+
+
 def load_figure(filename: str):
     return pio.read_json(filename)
 
@@ -51,10 +65,10 @@ def get_module_figures(module: str):
 
 def get_figure(filename: str):
     try:
-        print("trying")
         fig = load_figure(filename)
     except FileNotFoundError:
-        return ["Loading...", "Loading..."]
+        print("FIGURE NOT FOUND")
+        return ["Figure", "Figure not found. Need to be generated"]
     title: str = fig.layout.title.text
     html_fig: str = fig.to_html(full_html=False)
     html_fig = html_fig.replace("PNG", "SVG", 1)
@@ -122,7 +136,7 @@ class Config:
     )
     experiment_path: DirectoryPath = field(init=False)
     output_path: str = "images"
-    plots: str = r"config_files/config.yml"
+    plots: str = r"config_files/layout.yml"
     variables: str = r"config_files/variables.yml"
     gif: Dict = field(init=False)
 

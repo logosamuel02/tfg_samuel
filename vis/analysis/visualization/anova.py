@@ -24,7 +24,7 @@ def actualize_figure(fig):
     fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
 
 
-def create_atable_fig() -> Figure:
+def create_summary_table() -> Figure:
     atable = pre.anova_table()
     atable.columns = [clean(var) for var in atable.columns]
     fig: Figure = ff.create_table(atable)
@@ -95,7 +95,7 @@ def create_anova(
     atable_c: DataFrame = atable.copy()
     atable_c.columns = [clean(var) for var in atable_c.columns]
     fig: Figure = ff.create_table(atable_c)
-    fig.update_layout(config.plots["anova"]["anova"]["layout"])
+    fig.update_layout(config.plots["anova"][karg["name"]]["layout"])
     actualize_figure(fig)
     return fig
 
@@ -141,7 +141,7 @@ def create_manova_figs(var: str) -> List[Figure]:
 
 
 def generate(config: Config, action: str = "generate") -> list[str] | None:
-    f1 = create_atable_fig()
+    f1 = create_summary_table()
     f2 = create_interaction_plot("distribution", "ann")
     f3 = create_interaction_plot("ann", "distribution")
     f4 = create_box_plot("distribution")

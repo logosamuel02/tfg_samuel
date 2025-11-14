@@ -155,9 +155,7 @@ def anova_table(
 ) -> DataFrame:
     df = df_anova()
     atable: DataFrame = (
-        df.groupby([factor1, factor2])
-        .agg(maximum_accuracy=(level, operation_level))
-        .reset_index()
+        df.groupby([factor1, factor2]).agg(level=(level, operation_level)).reset_index()
     )
     return atable
 

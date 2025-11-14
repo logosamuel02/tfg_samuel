@@ -1,0 +1,4 @@
+anova_table: create_anova
+summary_atable: create_summary_table
+interaction_plot: create_interaction_plot
+

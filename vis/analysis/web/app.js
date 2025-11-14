@@ -6,7 +6,7 @@ async function load_all_figures() {
 
 async function generate_all_figures() {
   for (var plot_string of window.plots){
-    load_figure(plot_string)
+    generate_figure(plot_string)
 }
 }
 
@@ -53,20 +53,31 @@ async function regenerate(){
 }
 
 async function load_figure(plot){
-    $.get(`http://localhost:10000/manager/plots/anova/get_${plot}`, function(data) {
+    $.post(`http://localhost:10000/manager/plots/anova/get_figure`, plot, function(data) {
     // console.log(`Finish: get_${plot}`)
     $(`#title_${plot}`).html(data[0])
     $(`#figure_${plot}`).html(data[1])
   }).catch((error) => {
-  $(`#figure_${plot}`).html(error);
+  // $(`#figure_${plot}`).html(error);
+  console.log(error)
   });
   // console.log(`Start: get_${plot}`)
 }
 
 async function load_arguments(plot){
-    $.get(`http://localhost:10000/manager/plots/anova/args_${plot}`, function(data) {
+    $.post(`http://localhost:10000/manager/plots/anova/get_args`, plot, function(data) {
     // console.log(`Finished: args_${plot}`)
      var f = document.getElementById(`form_${plot}`)
+     var input = document.createElement("select");
+      input.hidden = "hidden";
+      input.name = "name"
+      input.form = f.id
+      input.id = `hidden_${plot}`
+      var option = document.createElement("option");
+        option.value = plot
+        option.text = plot
+        input.appendChild(option)
+      f.appendChild(input)
     //Create and append the options
     for (const parent in data){
       let textNode = document.createTextNode(parent); 
@@ -98,13 +109,14 @@ async function load_arguments(plot){
 }
 
 async function generate_figure(plot){
-    $.post(`http://localhost:10000/manager/plots/anova/gen_${plot}`, $(`#form_${plot}`).serialize(), function(data) {
+    $.post(`http://localhost:10000/manager/plots/anova/generate_figure`, $(`#form_${plot}`).serialize(), function(data) {
       // console.log(`Finished: gen_${plot}`)
     $(`#title_${plot}`).html(data[0])
     $(`#figure_${plot}`).html(data[1])
   }).catch((error) => {
-  $(`#figure_${plot}`).html("Any of the selected attributes is invalid.");
-  });
+  // $(`#figure_${plot}`).html("Any of the selected attributes is invalid.");
+    console.log(error)
+});
   // console.log(`Start: gen_${plot}`)
 }
 
@@ -139,7 +151,8 @@ const create_containers = (plots) => {
 	return containers.join(" ");
 }
 
-var plots = ["anova_table", "tuckey"] 
+var plots = ["anova_table", "summary_atable", "interaction_plot"]
+console.log(plots)
 
 // Create containers
 var containers = create_containers(window.plots)
