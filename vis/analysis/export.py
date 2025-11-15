@@ -20,18 +20,25 @@ def load_parameters(filename: str = r"config_files/parameters.yml"):
     return pams
 
 
+def load_layout(filename: str = r"config_files/layout.yml"):
+    with open(rf"{filename}", "r") as file:
+        pams = yaml.load(file, Loader=yaml.SafeLoader)
+    return pams
+
+
 def load_functions(filename: str = r"config_files/functions.yml"):
     with open(rf"{filename}", "r") as file:
         pams = yaml.load(file, Loader=yaml.SafeLoader)
     return pams
 
 
-def actualize_figure(fig):
-    folder = f"figures/{__name__.split('.')[-1]}"
+def actualize_figure(fig, name):
+    folder = f"figures"
     isExist: bool = os.path.exists(folder)
     if not isExist:
         os.makedirs(folder)
-    fig.write_json(rf"{folder}/{fig.layout.title.text.replace(' ', '_')}.json")
+    config = load_layout()
+    fig.write_json(rf"{folder}/{config[name]['filename'].replace(' ', '_')}.json")
 
 
 def load_figure(filename: str):
@@ -64,11 +71,12 @@ def get_module_figures(module: str):
 
 
 def get_figure(filename: str):
+    title = filename.split(".")[0].replace("_", " ")
     try:
         fig = load_figure(filename)
     except FileNotFoundError:
         print("FIGURE NOT FOUND")
-        return ["Figure", "Figure not found."]
+        return [title, "Figure not found."]
     title: str = fig.layout.title.text
     html_fig: str = fig.to_html(full_html=False)
     html_fig = html_fig.replace("PNG", "SVG", 1)

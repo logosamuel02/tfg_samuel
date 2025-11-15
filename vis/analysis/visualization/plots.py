@@ -37,6 +37,9 @@ def create_summary_table(
     fig.update_layout(
         title_text=f"Table of {clean(level)} achieved grouped by {clean(factor1)} and {clean(factor2)}"
     )
+    if "name" not in karg:
+        karg["name"] = "summary_atable"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -63,6 +66,9 @@ def create_interaction_plot(
         yaxis_title_text=config.variables[level]["legend"],
         legend_title_text=config.variables[factor2]["legend"],
     )
+    if "name" not in karg:
+        karg["name"] = "interaction_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -86,7 +92,12 @@ def create_box_plot(
         yaxis_title_text=config.variables[level]["legend"],
         legend_title_text=config.variables[factor1]["legend"],
     )
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "box_plot"
+    actualize_figure(fig, karg["name"])
+    if "name" not in karg:
+        karg["name"] = "box_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -107,7 +118,9 @@ def create_anova(
     atable_c.columns = [clean(var) for var in atable_c.columns]
     fig: Figure = ff.create_table(atable_c)
     fig.update_layout(config.plots["anova_table"]["layout"])
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "anova_table"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -120,7 +133,9 @@ def create_tuckey_test(
     pg_test_c.columns = [clean(var) for var in pg_test_c.columns]
     fig: Figure = ff.create_table(pg_test_c)
     fig.update_layout(config.plots["tuckey_test"]["layout"])
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "tuckey_test"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -141,7 +156,9 @@ def create_nemenyi_test(
     fig.update_traces(text=nemtable, texttemplate="%{text}")
     fig.update_xaxes(side="top")
     fig.update_layout(config.plots["nemenyi_test"]["layout"])
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "nemenyi_test"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -152,7 +169,9 @@ def create_manova_figure(factor1: str = "distribution", **karg) -> List[Figure]:
     var_results = var_results.rename(columns={"index": "tests"})
     fig: Figure = ff.create_table(var_results.round(3))
     fig.update_layout(config.plots["manova_table"]["layout"])
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "manova_table"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -165,7 +184,9 @@ def create_manova_figure_intercept(
     var_results = var_results.rename(columns={"index": "tests"})
     fig: Figure = ff.create_table(var_results.round(3))
     fig.update_layout(config.plots["manova_table_intercept"]["layout"])
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "manova_table_intercept"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -197,7 +218,9 @@ def violin_plot(
         yaxis_title_text=config.variables["seconds_to_complete"]["legend"],
         legend_title_text=config.variables["agent"]["legend"],
     )
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "violin_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -233,7 +256,9 @@ def execution_time_plot(orientation: str = "h", **karg) -> Figure:
         yaxis_title_text=config.variables["agent"]["legend"],
         legend_title_text=config.variables["agent"]["legend"],
     )
-    actualize_figure(fig)
+    if "name" not in karg:
+        karg["name"] = "execution_time_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -283,6 +308,9 @@ def create_bubble_plot(phase: str = "train", **karg) -> List[Figure]:
     fig.update_layout(config.plots["bubble_plot"]["layout"])
     fig.update_xaxes(config.plots["bubble_plot"]["axes"])
     fig.update_yaxes(config.plots["bubble_plot"]["axes"])
+    if "name" not in karg:
+        karg["name"] = "bubble_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -303,6 +331,9 @@ def heatmap_messages(color_scale: str = "Viridis", **karg) -> Figure:
     fig.update_traces(text=data_cross, texttemplate="<b>%{text}</b>")
     fig.update_xaxes(side="top")
     fig.update_layout(config.plots["heatmap_messages"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "heatmap_messages"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -323,6 +354,9 @@ def heatmap_sizes(
     fig.update_traces(text=data_cross, texttemplate="<b>%{text}</b>")
     fig.update_xaxes(side="top")
     fig.update_layout(config.plots["heatmap_sizes"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "heatmap_sizes"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -330,6 +364,9 @@ def statistics_messages(**karg) -> Figure:
     stats = pre.statistics_messages()
     fig: Figure = ff.create_table(stats)
     fig.update_layout(config.plots["statistics_messages"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "statistics_messages"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -342,6 +379,9 @@ def distribution_messages(color: str = "green", **karg) -> Figure:
         xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
         yaxis_title_text="Number of messages",
     )
+    if "name" not in karg:
+        karg["name"] = "distribution_messages"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -354,6 +394,9 @@ def distribution_messages_types(**karg) -> Figure:
         yaxis_title_text="Number of messages",
         legend_title_text="Type of messages",
     )
+    if "name" not in karg:
+        karg["name"] = "distribution_messages_types"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -367,6 +410,9 @@ def distribution_info(color: str = "green", **karg) -> Figure:
         xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
         yaxis_title_text="Amount of information",
     )
+    if "name" not in karg:
+        karg["name"] = "distribution_info"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -381,6 +427,9 @@ def distribution_info_type(unit: str = "B", **karg) -> Figure:
         yaxis_title_text=f"Amount of information {unit}",
         legend_title_text="Type of messages",
     )
+    if "name" not in karg:
+        karg["name"] = "distribution_info_type"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -412,6 +461,9 @@ def create_xy_scatter_plot(layer: str = "conv1", **karg) -> Figure:
         yaxis_title_text=clean(layers_opts[layer][1]),
         legend_title_text=config.variables["agent"]["legend"],
     )
+    if "name" not in karg:
+        karg["name"] = "xy_scatter"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -438,6 +490,9 @@ def create_scatter_plot(
             data.update(mode="markers", showlegend=True, opacity=1)
             data["x"] = np.take(data["x"], [-1])
             data["y"] = np.take(data["y"], [-1])
+    if "name" not in karg:
+        karg["name"] = "scatter_plot"
+    actualize_figure(scatter_plot, karg["name"])
     return scatter_plot
 
 
@@ -462,6 +517,9 @@ def create_line_plot(layer: str = "conv1", sublayer: str = "weight", **karg) -> 
         for data in frame.data:
             data.update(mode="lines", opacity=0.8, showlegend=False)
 
+    if "name" not in karg:
+        karg["name"] = "line_plot"
+    actualize_figure(line_plot, karg["name"])
     return line_plot
 
 
@@ -509,6 +567,9 @@ def create_combined_plot(
         legend_title_text=config.variables["agent"]["legend"],
     )
     combined_plot.update_layout(config.plots["combined_plot"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "combined_plot"
+    actualize_figure(combined_plot, karg["name"])
     return combined_plot
 
 
@@ -533,6 +594,9 @@ def train_by_agent(metric: str = "accuracy", **karg) -> List[Figure]:
         yaxis_title_text=config.variables[metric]["legend"],
         legend_title_text=config.variables["agent"]["legend"],
     )
+    if "name" not in karg:
+        karg["name"] = "train_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -553,6 +617,9 @@ def test_by_agent(metric: str = "accuracy", **karg) -> List[Figure]:
         yaxis_title_text=config.variables[metric]["legend"],
         legend_title_text=config.variables["agent"]["legend"],
     )
+    if "name" not in karg:
+        karg["name"] = "test_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -641,6 +708,9 @@ def train_test_plot(metric: str = "accuracy", **karg) -> List[Figure]:
         yaxis_title_text=config.variables[metric]["legend"],
         legend_title_text=config.variables["agent"]["legend"],
     )
+    if "name" not in karg:
+        karg["name"] = "train_test_plot"
+    actualize_figure(fig, karg["name"])
     return fig
 
 
@@ -694,6 +764,9 @@ def create_nodes_plot(
     )
 
     nodes_plot.update_layout(config.plots["nodes_plot"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "nodes_plot"
+    actualize_figure(nodes_plot, karg["name"])
     return nodes_plot
 
 
@@ -841,6 +914,9 @@ def create_edges_plot(
     edges_plot.update_traces(config.plots["edges_plot"]["traces"])
     edges_plot.update_layout(coloraxis_colorbar_title=f"Test {metric}")
     edges_plot.update_layout(config.plots["edges_plot"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "edges_plot"
+    actualize_figure(edges_plot, karg["name"])
     return edges_plot
 
 
@@ -891,6 +967,9 @@ def create_network_plot(
     combined_plot.update_yaxes(range=[ymin - i, ymax + i])
 
     combined_plot.update_layout(config.plots["network_plot"]["layout"])
+    if "name" not in karg:
+        karg["name"] = "network_plot"
+    actualize_figure(combined_plot, karg["name"])
     return combined_plot
 
 

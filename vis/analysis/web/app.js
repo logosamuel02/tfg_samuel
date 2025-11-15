@@ -123,7 +123,6 @@ async function generate_figure(plot){
     $(`#title_${plot}`).html(data[0])
     $(`#figure_${plot}`).html(data[1])
   }).catch((error) => {
-    $(`#figure_${plot}`).htnl("LOADING")
   // $(`#figure_${plot}`).html("Any of the selected attributes is invalid.");
     console.log(error)
 });
