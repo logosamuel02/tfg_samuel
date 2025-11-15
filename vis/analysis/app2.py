@@ -18,6 +18,30 @@ async def ANOVA(request):
     return
 
 
+async def ALGORITHM(request):
+    return
+
+
+async def DATA_SPLIT(request):
+    return
+
+
+async def MESSAGES(request):
+    return
+
+
+async def CONVERGENCE(request):
+    return
+
+
+async def INFERENCE(request):
+    return
+
+
+async def NETWORK(request):
+    return
+
+
 async def GET_ARGS(request):
     form = await request.post()
     form = list(form)[0]
@@ -48,32 +72,8 @@ async def GEN_FIGURE(request):
         fig = gen_func(**form)
         return filename, fig.to_html(full_html=False)
     except Exception as e:
-        print(e)
+        print("Error", e)
         return filename, "Some of the attributes selected is not valid"
-
-
-# async def ALGORITHM(request):
-#     return {"figures": algorithm.generate(config=config, action="return")}
-
-
-# async def DATA_SPLIT(request):
-#     return {"figures": data_split.generate(config=config, action="return")}
-
-
-# async def MESSAGES(request):
-#     return {"figures": messages.generate(config=config, action="return")}
-
-
-# async def CONVERGENCE(request):
-#     return {"figures": convergence.generate(config=config, action="return")}
-
-
-# async def INFERENCE(request):
-#     return {"figures": inference.generate(config=config, action="return")}
-
-
-# async def NETWORK(request):
-#     return {"figures": network.generate(config=config, action="return")}
 
 
 class DummyAgent(Agent):
@@ -100,7 +100,19 @@ async def main():
     dummy = DummyAgent("dummy@localhost", "your_password")
     print("DummyAgent started. Check its console to see the output.")
 
+    ### MENU ENTRIES
+
     dummy.web.add_menu_entry("Anova", "/manager/plots/anova", "fa fa-bolt")
+    dummy.web.add_menu_entry("Algorithm", "/manager/plots/algorithm", "fa fa-rocket")
+    dummy.web.add_menu_entry("Data Split", "/manager/plots/data_split", "fa fa-bomb")
+    dummy.web.add_menu_entry("Messages", "/manager/plots/messages", "fa fa-comments")
+    dummy.web.add_menu_entry(
+        "Convergence", "/manager/plots/convergence", "fa fa-map-pin"
+    )
+    dummy.web.add_menu_entry("Inference", "/manager/plots/inference", "fa fa-forward")
+    dummy.web.add_menu_entry("Network", "/manager/plots/network", "fa fa-sitemap")
+
+    ### STATIC FILES: LOGO AND .JS
 
     dummy.web.app.router.add_static(
         "/manager/plots/rfLogo",
@@ -112,11 +124,51 @@ async def main():
         r"C:\Users\samue\OneDrive\Escritorio\Tareas UNI\tfg\tfg_samuel\vis\analysis\web",
     )
 
+    ## OPEN EACH HTML MODULE
+
     dummy.web.add_get(
         "/manager/plots/anova",
         ANOVA,
         template="web/anova.html",
     )
+
+    dummy.web.add_get(
+        "/manager/plots/algorithm",
+        ALGORITHM,
+        template="web/algorithm.html",
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/data_split",
+        DATA_SPLIT,
+        template="web/data_split.html",
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/messages",
+        MESSAGES,
+        template="web/messages.html",
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/convergence",
+        CONVERGENCE,
+        template="web/convergence.html",
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/inference",
+        INFERENCE,
+        template="web/inference.html",
+    )
+
+    dummy.web.add_get(
+        "/manager/plots/network",
+        NETWORK,
+        template="web/network.html",
+    )
+
+    ### FIGURE METHODS
 
     dummy.web.add_post(
         "/manager/plots/anova/get_figure",

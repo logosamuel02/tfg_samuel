@@ -160,22 +160,24 @@ def anova_table(
     return atable
 
 
-def manova_table(factor: str = "distribution") -> MultivariateTestResults:
+def manova_table(factor1: str = "distribution") -> MultivariateTestResults:
     df = df_anova()
     manova: MANOVA = MANOVA.from_formula(
-        f"maximum_accuracy_achieved + maximum_recall_achieved + maximum_precision_achieved + maximum_f1_achieved ~ {factor}",
+        f"maximum_accuracy_achieved + maximum_recall_achieved + maximum_precision_achieved + maximum_f1_achieved ~ {factor1}",
         data=df,
     )
     result: MultivariateTestResults = manova.mv_test()
     return result
 
 
-def nemenyi_test():
+def nemenyi_test(
+    factor1: str = "distribution", level: str = "maximum_accuracy_achieved"
+):
     df = df_anova()
-    options: List[str] = df.distribution.unique()
+    options: List[str] = df[factor1].unique()
     array = []
     for opt in options:
-        opt_values: float = df.maximum_accuracy_achieved[(df.distribution == opt)]
+        opt_values: float = df[level][(df[factor1] == opt)]
         array.append(opt_values)
     data_nem: npt.NDArray[np.float64] = np.array(array)
     nemtable: npt.NDArray[np.float64] = sp.posthoc_nemenyi_friedman(
@@ -184,7 +186,7 @@ def nemenyi_test():
     return nemtable, options
 
 
-def convergence_df() -> DataFrame:
+def convergence_df(layer: str = "conv1") -> DataFrame:
     df: DataFrame = pd.read_csv(config.experiment_path / r"nn_convergence.csv")
     lst: List[str] = df.layer.unique()
     split_layer_str = lambda x: x.split(".")[0]
@@ -194,7 +196,7 @@ def convergence_df() -> DataFrame:
     }
     df: DataFrame = df[(df.description == "PRE-TRAIN") & (df.epoch_or_iteration == 1)]
     pivot: DataFrame = df.pivot(columns="layer", values="weight")
-    df = df[df.layer == layers_opts["conv1"][0]].reset_index()
+    df = df[df.layer == layers_opts[layer][0]].reset_index()
 
     for layer in layers_opts.keys():
         df[layers_opts[layer][0]] = (
@@ -276,8 +278,8 @@ def bubble_interprocess(phase: str = "train"):
     for i in range(M):
         xmin, xmax = X_sizes[i, :].min(), X_sizes[i, :].max()
         tmin, tmax = (
-            config.plots["data_split"]["bubble"]["size_factors"]["min_bubble_size"],
-            config.plots["data_split"]["bubble"]["size_factors"]["max_bubble_size"],
+            config.plots["bubble"]["size_factors"]["min_bubble_size"],
+            config.plots["bubble"]["size_factors"]["max_bubble_size"],
         )
         X_sizes[i, :] = (X_sizes[i, :] - xmin) / (xmax - xmin) * (tmax - tmin) + tmin
     x = []
@@ -307,7 +309,8 @@ def heatmap_messages():
     return agents, data_cross
 
 
-def heatmap_sizes():
+def heatmap_sizes(unit: str = "MB"):
+    dic_sizes = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
     data = load.message_dataset()
     data: DataFrame = data[["sender", "to", "size"]]
     data.sender = list(map(lambda x: x.split("@")[0], data.sender))
@@ -315,7 +318,7 @@ def heatmap_sizes():
     data_cross: DataFrame = (
         data.groupby(["sender", "to"])["size"]
         .sum()
-        .div(1024 * 1024)
+        .div(dic_sizes[unit])
         .round(0)
         .unstack()
         .fillna(0)
@@ -358,7 +361,7 @@ def distribution_data_df() -> Figure:
     return data
 
 
-def create_network_coordinates():
+def create_network_coordinates(seed: int = 42):
     # CONVERT DATA
     messages_mod: DataFrame = load.message_dataset()
     messages_mod = messages_mod[
@@ -371,7 +374,7 @@ def create_network_coordinates():
 
     # GENERATE COORDINATES
     cross: DataFrame = pd.crosstab(index=messages_mod.sender, columns=messages_mod.to)
-    G: Graph = nx.random_geometric_graph(len(agents), 0)
+    G: Graph = nx.random_geometric_graph(len(agents), 0, seed=seed)
     G = nx.relabel_nodes(G, {i: a for i, a in enumerate(agents)})
     tuples: DataFrame = cross.stack().reset_index()
     tuples = tuples[tuples[0] > 0]
@@ -384,8 +387,6 @@ def create_network_coordinates():
         x, y = G.nodes[node]["pos"]
         node_x.append(x)
         node_y.append(y)
-
-    np.random.seed(2)
 
     x_dictionary: Dict[str : npt.NDArray[np.float64]] = {
         x: node_x[i] for i, x in enumerate(agents)
@@ -413,7 +414,7 @@ def create_edges_df(msg_type: str = "SEND-LAYERS") -> DataFrame:
     edges["timestamp"] = edges.timestamp.apply(
         lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
     )
-    return msg_type, edges
+    return edges
 
 
 def create_nodes_df(metric: str = "accuracy") -> DataFrame:
@@ -428,16 +429,16 @@ def create_nodes_df(metric: str = "accuracy") -> DataFrame:
     nodes["timestamp"] = nodes.timestamp.apply(
         lambda x: round((x - first_date) / pd.Timedelta(seconds=1), 2)
     )
-    return metric, nodes
+    return nodes
 
 
-def create_network_artifacts():
-    metric, nodes = create_nodes_df()
-    msg_type, edges = create_edges_df()
+def create_network_artifacts(metric: str = "accuracy", msg_type: str = "SEND-LAYERS"):
+    nodes = create_nodes_df(metric)
+    edges = create_edges_df(msg_type)
     timestamps: List[float] = sorted(
         list(set(nodes.timestamp.to_list() + edges.timestamp.to_list()))
     )
-    return nodes, edges, timestamps, metric, msg_type
+    return nodes, edges, timestamps
 
 
 def nodes_panel_data(nodes: DataFrame, timestamps, x_coords, y_coords, metric):

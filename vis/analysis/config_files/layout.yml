@@ -9,54 +9,134 @@ summary_atable:
 anova_table:
   filename: ANOVA Table
   layout:
-    template: seaborn
+    template: &default_template
+      seaborn
     title_text: ANOVA table
 
 interaction_plot:
   filename: Interaction plot
-  layout:
-    template: seaborn
+  layout: &simple_layout
+    template: *default_template
 
-bar:
-  filename: title
+box_plot:
+  filename: Box plot
+  layout: *simple_layout
+
+tuckey_test:
+  filename: Post-hoc Tuckey Test
   layout:
-    template: seaborn
+    template: *default_template
+    title_text: Post-hoc Tuckey Test
+
+nemenyi_test:
+  filename: Post-hoc Nemenyi Test
+  layout:
+    coloraxis_colorscale: Cividis
+    template: *default_template
+    title_text: Post-hoc Nemenyi Test
+
+manova_table:
+  filename: MANOVA table
+  layout:
+    template: *default_template
+    title_text: MANOVA table
+  
+manova_table_intercept:
+  filename: MANOVA table Intercept
+  layout:
+    template: *default_template
+    title_text: MANOVA table Intercept
+
+violin_plot:
+  filename: Seconds to complete training round by agent
+  layout:
+    template: *default_template
+    title_text: Seconds to complete training round by agent
+
+execution_time_plot:
+  filename: Total execution time by agent
+  layout:
+    template: *default_template
     title_text: Total execution time by agent
   traces:
     cliponaxis: false
     textangle: 0
     textfont_size: 12
     textposition: outside
-violin:
+
+bubble_plot:
+  filename: Bubble plot data split
+  axes:
+    gridcolor: grey
+    gridwidth: 1
+    showgrid: true
   layout:
-    template: seaborn
-    title_text: Seconds to complete training round by agent
+    plot_bgcolor: rgb(256,256,256)
+    template: *default_template
+  size_factors:
+    height: 67
+    max_bubble_size: 55
+    min_bubble_size: 20
+    width: 143
+
+heatmap_messages:
+  filename: Total messages sent between agents
+  layout:
+    template: *default_template
+    title_text: Total messages sent between agents
+
+heatmap_sizes:
+  filename: Information (MB) sent between agents
+  layout:
+    template: *default_template
+    title_text: Information sent between agents
+
+statistics_messages:
+  filename: Statistics by message type
+  layout:
+    template: *default_template
+    title_text: Statistics by message type
+
+distribution_messages:
+  filename: Distribution of messages over time
+  layout:
+    template: *default_template
+    title_text: Distribution of messages over time
   traces:
-    box_visible: true
-    meanline_visible: true
-box:
-  layout:
-    template: seaborn
+    marker_color: green
 
-manova_inter:
+distribution_messages_types:
+  filename: Distribution of messages over time by type
   layout:
-    template: seaborn
-    title_text: MANOVA table Intercept
-manova_var:
-  layout:
-    template: seaborn
-    title_text: MANOVA table Variable
-nemenyi:
-  layout:
-    coloraxis_colorscale: Cividis
-    template: seaborn
-    title_text: Post-hoc Nemenyi Test
-tuckey:
-  layout:
-    template: seaborn
-    title_text: Post-hoc Tuckey Test
+    template: *default_template
+    title_text: Distribution of messages over time by type
 
-combined:
+distribution_info:
+  filename: Distribution of information over time
+  layout:
+    template: *default_template
+    title_text: Distribution of information over time
+  
+
+distribution_info_type:
+  filename: Distribution of information over time by message type
+  layout:
+    template: *default_template
+    title_text: Distribution of information over time by message type
+
+xy_scatter:
+  filename: Scatter plot for a single layer
+  layout:
+    template: plotly_white
+
+scatter_plot: 
+  filename: Evolution of a sublayer (Scatter)
+
+line_plot:
+  filename: Evolution of a sublayer (Line)
+
+combined_plot:
+  filename: Evolution of a sublayer
   layout:
     template: plotly_white
   traces:
@@ -76,33 +156,21 @@ combined:
     gridwidth: 0.5
     linewidth: 2
     tickwidth: 2
-xy_scatter:
-  layout:
-    template: plotly_white
 
-bubble:
-  axes:
-    gridcolor: grey
-    gridwidth: 1
-    showgrid: true
+train_plot:
+  filename: Train evolution across rounds by agent
   layout:
-    plot_bgcolor: rgb(256,256,256)
-    template: seaborn
-  size_factors:
-    height: 67
-    max_bubble_size: 55
-    min_bubble_size: 20
-    width: 143
+    template: *default_template
 
-test:
+test_plot:
+  filename: Test evolution across rounds by agent
   layout:
-    template: seaborn
-train:
+    template: *default_template
+
+train_test_plot: 
+  filename: Train and test evolution across rounds by metric
   layout:
-    template: seaborn
-train_test:
-  layout:
-    template: seaborn
+    template: *default_template
   traces:
     mean_test_linecolor: rgb(231,107,243)
     mean_train_linecolor: rgb(0,176,246)
@@ -111,68 +179,8 @@ train_test:
     train_fillcolor: rgba(0,176,246,0.2)
     train_linecolor: rgba(255,255,255,0)
 
-dist_info:
-  layout:
-    template: seaborn
-    title_text: Distribution of information over time
-  traces:
-    marker_color: indianred
-dist_info_type:
-  layout:
-    template: seaborn
-    title_text: Distribution of information (Bytes) over time by message type
-dist_msg:
-  layout:
-    template: seaborn
-    title_text: Distribution of messages over time
-  traces:
-    marker_color: green
-dist_msg_type:
-  layout:
-    template: seaborn
-    title_text: Distribution of messages over time by type
-heat_info:
-  layout:
-    template: seaborn
-    title_text: Information (MB) sent between agents
-heat_msg:
-  layout:
-    template: seaborn
-    title_text: Total messages sent between agents
-table_msg:
-  layout:
-    template: seaborn
-    title_text: Statistics by message type
-
-edges:
-  axes:
-    showgrid: false
-    showticklabels: false
-    title: null
-    zeroline: false
-  layout:
-    coloraxis_colorbar_title: Test accuracy
-    coloraxis_colorbar_x: -0.15
-    height: 800
-    template: plotly_white
-    width: 800
-  other:
-    border: 0.07
-    frame_duration: 50
-    marker_size: 35
-    max_size_lines: 20
-    transition_duration: 25
-  traces:
-    textfont_size: 20
-network:
-  layout:
-    template: plotly_white
-  traces:
-    marker:
-      line_color: DarkSlateGrey
-      opacity: 1
-      size: 35
-nodes:
+nodes_plot:
+  filename: Network nodes evolution
   axes:
     showgrid: false
     showticklabels: false
@@ -191,3 +199,35 @@ nodes:
     textfont_family: Arial Black
     textfont_size: 17
     textposition: top center
+
+edges_plot:
+  filename: Network edges evolution
+  axes:
+    showgrid: false
+    showticklabels: false
+    title: null
+    zeroline: false
+  layout:
+    coloraxis_colorbar_x: -0.15
+    height: 800
+    template: plotly_white
+    width: 800
+  other:
+    border: 0.07
+    frame_duration: 50
+    marker_size: 35
+    max_size_lines: 20
+    transition_duration: 25
+  traces:
+    textfont_size: 20
+
+network_plot:
+  filename: Network evolution 
+  layout:
+    template: plotly_white
+  traces:
+    marker:
+      line_color: DarkSlateGrey
+      opacity: 1
+      size: 35
+

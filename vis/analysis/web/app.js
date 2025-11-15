@@ -137,7 +137,11 @@ const create_containers = (plots) => {
 	container += "\t  <div class=\"card\">\n";
 	container += `\t\t<h5 class=\"card-header\" id=\"title_${plot}\"></h5>\n`;
 	container += "\t\t<div class=\"plotly-chart\">\n";
-	container += `\t\t  <form id=\"form_${plot}\" target=\"hiddenFrame\"></form>\n`;
+	container += `\t\t  <form id=\"form_${plot}\" target=\"hiddenFrame\">`;
+  container += `<select name=\"name\" hidden=\"hidden\" form=\"form_${plot}\" id=\"hidden_${plot}\">`
+  container += `<option value=\"${plot}\"></option>`
+  container += "</select>"
+  container += "\t\t</form>\n"
 	container += "\t\t</div>\n";
 	container += "\t\t<div class=\"card-body\">\n";
 	container += `\t\t  <div class=\"plotly-chart\" id=\"figure_${plot}\">\n`;
@@ -151,8 +155,7 @@ const create_containers = (plots) => {
 	return containers.join(" ");
 }
 
-var plots = ["anova_table", "summary_atable", "interaction_plot"]
-console.log(plots)
+console.log(window.plots)
 
 // Create containers
 var containers = create_containers(window.plots)

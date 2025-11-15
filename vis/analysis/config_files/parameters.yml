@@ -27,34 +27,137 @@ anova_table:
 
 interaction_plot: *fflo
 
-#   box:
-  
-#   interaction:
-  
-#   manova_inter:
+box_plot: &fl
+  factor1 : *factor
+  level: *level
 
-#   manova_var:
+tuckey_test: *fl
+
+nemenyi_test: 
+  factor1 : *factor
+  level: *level
+  color_scale: &color_scale
+    - Viridis
+    - Cividis
+    - Icefire
+    - Portland
+    - Rainbow
+    - Sunset
+    - Spectral
+
+manova_table: 
+  factor1: *factor
+
+manova_table_intercept: 
+  factor1: *factor
+
+violin_plot:
+  box_visible: &tf
+    - true
+    - false
+  meanline_visible: *tf
+
+execution_time_plot:
+  orientation:
+    - h
+    - v
+
+bubble_plot:
+  phase:
+    - train
+    - validation
+    - test
+
+heatmap_messages: 
+  color_scale: *color_scale
+
+heatmap_sizes:
+  unit: &unit
+    - B
+    - KB
+    - MB
+    - GB
+  color_scale: *color_scale
+
+statistics_messages:
+
+distribution_messages:
+  color: &color
+      - green
+      - blue 
+      - red 
+      - yellow
+      - purple
+      - orange
+      - grey
+distribution_messages_types:
+
+distribution_info:
+  color : *color
+
+distribution_info_type:
+  unit: *unit
+
+xy_scatter:
+  layer: &layer
+    - conv1
+    - conv2
+    - fc1
+    - fc2
+    - fc3
+    - fc4
+    - fc5
+
+scatter_plot: &laysub
+  layer: *layer
+  sublayer: &sublayer
+    - weight
+    - bias
+
+line_plot: *laysub
+
+combined_plot: *laysub
+
+train_plot:
+  metric: &metric
+    - accuracy
+    - loss
+    - precision
+    - recall
+    - f1_score
+
+test_plot: 
+  metric: *metric
+
+train_test_plot:
+  metric: *metric
+
+nodes_plot:
+  metric: *metric
+  msg_type: &msg_type
+    - SEND-LAYERS
+    - RECV-LAYERS
+    - SEND-SIMILARITY
+    - RECV-SIMILARITY
+    - SEND-SIMILARITY-REQREPLY
+    - SEND-LAYERS-REQREPLY
+  seed: &seed [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+
+edges_plot:
+  metric: *metric
+  msg_type: *msg_type
+  seed: *seed
+
+network_plot:
+  metric: *metric
+  msg_type: *msg_type
+  seed: *seed
+
+
+
+
   
-#   nemenyi:
   
-#   table_grouped:
-  
-tuckey:
-  factor:
-    - algorithm
-    - algorithm_rounds
-    - consensus_iterations
-    - training_epochs
-    - dataset
-    - distribution
-    - ann
-  level:
-    - minimum_loss_achieved
-    - maximum_accuracy_achieved
-    - maximum_recall_achieved
-    - maximum_precision_achieved
-    - maximum_f1_achieved
-    - mean_seconds_by_round
   
 # convergence:
 #   combined:

@@ -303,7 +303,7 @@
                   <span class="ml-2">Plots</span>
                   <div class="dropdown-menu">
                     <a
-                      class="dropdown-item d-flex gap-2 align-items-center rounded active"
+                      class="dropdown-item d-flex gap-2 align-items-center rounded"
                       href="/manager/plots/anova"
                       >Anova</a
                     >
@@ -328,7 +328,7 @@
                       >Convergence</a
                     >
                     <a
-                      class="dropdown-item d-flex gap-2 align-items-center"
+                      class="dropdown-item d-flex gap-2 align-items-center active"
                       href="/manager/plots/inference"
                       >Inference</a
                     >
@@ -517,14 +517,9 @@
   </body>
   <script>
     var plots = [
-      "anova_table",
-      "summary_atable",
-      "interaction_plot",
-      "box_plot",
-      "tuckey_test",
-      "nemenyi_test",
-      "manova_table",
-      "manova_table_intercept",
+      "train_plot",
+      "test_plot",
+      "train_test_plot"
     ];
   </script>
   <script src="web/app.js"></script>
