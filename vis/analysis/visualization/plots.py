@@ -650,12 +650,14 @@ def train_test_plot(metric: str = "accuracy", **karg) -> List[Figure]:
 
 
 def create_nodes_plot(
-    metric: str = "accuracy", msg_type: str = "SEND-LAYERS", seed: int = 42, **karg
+    metric: str = "accuracy", msg_type: str = "SEND-LAYERS", seed: str = "15", **karg
 ) -> Figure:
     x_coords, y_coords = pre.create_network_coordinates(seed)
     nodes, edges, timestamps = pre.create_network_artifacts(metric, msg_type)
 
-    nodes, range_color = pre.nodes_panel_data(nodes, timestamps, x_coords, y_coords)
+    nodes, range_color = pre.nodes_panel_data(
+        nodes, timestamps, x_coords, y_coords, metric
+    )
 
     nodes_plot: Figure = px.scatter(
         nodes,
@@ -692,13 +694,13 @@ def create_nodes_plot(
     )
 
     nodes_plot.update_layout(config.plots["nodes_plot"]["layout"])
-    return range_color, nodes_plot
+    return nodes_plot
 
 
 def create_edges_plot(
     metric: str = "accuracy",
     msg_type: str = "SEND-LAYERS",
-    seed: int = 42,
+    seed: str = "15",
     **karg,
 ) -> Figure:
     x_coords, y_coords = pre.create_network_coordinates(seed)
@@ -847,15 +849,20 @@ def create_network_plot(
     edges_plot: Figure | None = None,
     metric: str = "accuracy",
     msg_type: str = "SEND-LAYERS",
-    seed: int = 42,
+    seed: str = "15",
     **karg,
 ) -> Figure:
     if nodes_plot is None:
-        range_color, nodes_plot = create_nodes_plot(metric, msg_type, seed)
+        nodes_plot = create_nodes_plot(metric, msg_type, seed)
     if edges_plot is None:
-        range_color, edges_plot = create_edges_plot(metric, msg_type, seed)
+        edges_plot = create_edges_plot(metric, msg_type, seed)
 
     x_coords, y_coords = pre.create_network_coordinates(seed)
+    nodes, edges, timestamps = pre.create_network_artifacts(metric, msg_type)
+
+    nodes, range_color = pre.nodes_panel_data(
+        nodes, timestamps, x_coords, y_coords, metric
+    )
     combined_plot: Figure = go.Figure(
         data=edges_plot.data + nodes_plot.data,
         frames=[

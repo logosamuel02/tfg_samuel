@@ -68,7 +68,7 @@ def get_figure(filename: str):
         fig = load_figure(filename)
     except FileNotFoundError:
         print("FIGURE NOT FOUND")
-        return ["Figure", "Figure not found. Need to be generated"]
+        return ["Figure", "Figure not found."]
     title: str = fig.layout.title.text
     html_fig: str = fig.to_html(full_html=False)
     html_fig = html_fig.replace("PNG", "SVG", 1)

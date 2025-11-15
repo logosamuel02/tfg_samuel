@@ -361,7 +361,7 @@ def distribution_data_df() -> Figure:
     return data
 
 
-def create_network_coordinates(seed: int = 42):
+def create_network_coordinates(seed: str = "15"):
     # CONVERT DATA
     messages_mod: DataFrame = load.message_dataset()
     messages_mod = messages_mod[
@@ -374,7 +374,7 @@ def create_network_coordinates(seed: int = 42):
 
     # GENERATE COORDINATES
     cross: DataFrame = pd.crosstab(index=messages_mod.sender, columns=messages_mod.to)
-    G: Graph = nx.random_geometric_graph(len(agents), 0, seed=seed)
+    G: Graph = nx.random_geometric_graph(len(agents), 0, seed=int(seed))
     G = nx.relabel_nodes(G, {i: a for i, a in enumerate(agents)})
     tuples: DataFrame = cross.stack().reset_index()
     tuples = tuples[tuples[0] > 0]

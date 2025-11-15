@@ -64,6 +64,14 @@ async function load_figure(plot){
   // console.log(`Start: get_${plot}`)
 }
 
+function capitalize(str) {
+  const lowerCaseString = str.toLowerCase(), // convert string to lowercase  
+  firstLetter = str.charAt(0).toUpperCase(), // uppercase the first character
+  strWithoutFirstChar = lowerCaseString.slice(1); // remove first character from lowercase string 
+
+  return firstLetter + strWithoutFirstChar; 
+}
+
 async function load_arguments(plot){
     $.post(`http://localhost:10000/manager/plots/anova/get_args`, plot, function(data) {
     // console.log(`Finished: args_${plot}`)
@@ -80,8 +88,9 @@ async function load_arguments(plot){
       f.appendChild(input)
     //Create and append the options
     for (const parent in data){
-      let textNode = document.createTextNode(parent); 
+      let textNode = document.createTextNode(`${capitalize(parent.replace("_", " "))}: `); 
       f.appendChild(textNode);
+      console.log(textNode)
       var selectList = document.createElement("select");
       selectList.id = `${parent}_${plot}`;
       selectList.form = f.id
@@ -114,6 +123,7 @@ async function generate_figure(plot){
     $(`#title_${plot}`).html(data[0])
     $(`#figure_${plot}`).html(data[1])
   }).catch((error) => {
+    $(`#figure_${plot}`).htnl("LOADING")
   // $(`#figure_${plot}`).html("Any of the selected attributes is invalid.");
     console.log(error)
 });
@@ -131,7 +141,6 @@ async function send_form(plot) {
 const create_containers = (plots) => {
     var containers = []
   for (const plot of plots){
-    console.log(plot)
     let container = "";
 	container += `<div id=\"filter-target-${plot}\" class=\"row mt-3\">\n`;
 	container += "\t  <div class=\"card\">\n";
@@ -154,8 +163,6 @@ const create_containers = (plots) => {
   console.log("Finish: created containers")
 	return containers.join(" ");
 }
-
-console.log(window.plots)
 
 // Create containers
 var containers = create_containers(window.plots)

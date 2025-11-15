@@ -72,8 +72,11 @@ async def GEN_FIGURE(request):
         fig = gen_func(**form)
         return filename, fig.to_html(full_html=False)
     except Exception as e:
-        print("Error", e)
-        return filename, "Some of the attributes selected is not valid"
+        print("Error in generation:", e)
+        return (
+            filename,
+            "Generation failed. Some of the attributes selected are not valid.",
+        )
 
 
 class DummyAgent(Agent):
