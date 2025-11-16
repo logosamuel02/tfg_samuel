@@ -419,9 +419,9 @@ def distribution_info(color: str = "green", **karg) -> Figure:
 def distribution_info_type(unit: str = "B", **karg) -> Figure:
     data = pre.distribution_data_df()
     dic_sizes = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
-    data.size = round(data.size / dic_sizes[unit], 0)
+    data.size = round(data.size / dic_sizes[unit], 3)
     fig: Figure = px.histogram(data, x="timestamp_minutes", y="size", color="type")
-    fig.update_layout(config.plots["dist_info_type"]["layout"])
+    fig.update_layout(config.plots["distribution_info_type"]["layout"])
     fig.update_layout(
         xaxis_title_text=config.variables["timestamp_minutes"]["legend"],
         yaxis_title_text=f"Amount of information {unit}",
@@ -720,11 +720,17 @@ def train_test_plot(metric: str = "accuracy", **karg) -> List[Figure]:
 
 
 def create_nodes_plot(
-    metric: str = "accuracy", msg_type: str = "SEND-LAYERS", seed: str = "15", **karg
+    phase: str = "train",
+    metric: str = "accuracy",
+    msg_type: str = "SEND-LAYERS",
+    seed: str = "15",
+    **karg,
 ) -> Figure:
     x_coords, y_coords = pre.create_network_coordinates(seed)
-    nodes, edges, timestamps = pre.create_network_artifacts(metric, msg_type)
+    nodes, edges, timestamps = pre.create_network_artifacts(phase, metric, msg_type)
 
+    if phase != "train":
+        metric = f"{phase}_{metric}"
     nodes, range_color = pre.nodes_panel_data(
         nodes, timestamps, x_coords, y_coords, metric
     )
@@ -771,13 +777,16 @@ def create_nodes_plot(
 
 
 def create_edges_plot(
+    phase: str = "train",
     metric: str = "accuracy",
     msg_type: str = "SEND-LAYERS",
     seed: str = "15",
     **karg,
 ) -> Figure:
     x_coords, y_coords = pre.create_network_coordinates(seed)
-    nodes, edges, timestamps = pre.create_network_artifacts(metric, msg_type)
+    nodes, edges, timestamps = pre.create_network_artifacts(
+        phase=phase, metric=metric, msg_type=msg_type
+    )
     edges = pre.edges_panel_data(edges, timestamps, x_coords, y_coords)
 
     def new_value(value: int) -> int:
@@ -923,18 +932,22 @@ def create_edges_plot(
 def create_network_plot(
     nodes_plot: Figure | None = None,
     edges_plot: Figure | None = None,
+    phase: str = "train",
     metric: str = "accuracy",
     msg_type: str = "SEND-LAYERS",
     seed: str = "15",
     **karg,
 ) -> Figure:
     if nodes_plot is None:
-        nodes_plot = create_nodes_plot(metric, msg_type, seed)
+        nodes_plot = create_nodes_plot(phase, metric, msg_type, seed)
     if edges_plot is None:
-        edges_plot = create_edges_plot(metric, msg_type, seed)
+        edges_plot = create_edges_plot(phase, metric, msg_type, seed)
 
     x_coords, y_coords = pre.create_network_coordinates(seed)
-    nodes, edges, timestamps = pre.create_network_artifacts(metric, msg_type)
+    nodes, edges, timestamps = pre.create_network_artifacts(phase, metric, msg_type)
+
+    if phase != "train":
+        metric = f"{phase}_{metric}"
 
     nodes, range_color = pre.nodes_panel_data(
         nodes, timestamps, x_coords, y_coords, metric

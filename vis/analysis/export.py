@@ -70,18 +70,22 @@ def get_module_figures(module: str):
     return html_tuples
 
 
+def conversion_svg_figure(fig):
+    html_fig: str = fig.to_html(full_html=False)
+    html_fig = html_fig.replace("PNG", "SVG", 1)
+    html_fig = html_fig.replace("png", "svg", 3)
+    return html_fig
+
+
 def get_figure(filename: str):
-    title = filename.split(".")[0].replace("_", " ")
+    title = Path(filename).name.split(".")[0].replace("_", " ")
     try:
         fig = load_figure(filename)
     except FileNotFoundError:
         print("FIGURE NOT FOUND")
         return [title, "Figure not found."]
     title: str = fig.layout.title.text
-    html_fig: str = fig.to_html(full_html=False)
-    html_fig = html_fig.replace("PNG", "SVG", 1)
-    html_fig = html_fig.replace("png", "svg", 3)
-    return title, html_fig
+    return title, conversion_svg_figure(fig)
 
 
 def download_figures(

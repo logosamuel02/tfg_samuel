@@ -63,7 +63,7 @@ execution_time_plot:
     - v
 
 bubble_plot:
-  phase:
+  phase: &phase
     - train
     - validation
     - test
@@ -133,6 +133,7 @@ train_test_plot:
   metric: *metric
 
 nodes_plot:
+  phase: *phase
   metric: *metric
   msg_type: &msg_type
     - SEND-LAYERS
@@ -149,49 +150,7 @@ edges_plot:
   seed: *seed
 
 network_plot:
+  phase: *phase
   metric: *metric
   msg_type: *msg_type
   seed: *seed
-
-
-
-
-  
-  
-  
-# convergence:
-#   combined:
-  
-#   xy_scatter:
-  
-# data_split:
-#   bubble:
-
-# inference:
-#   test:
-  
-#   train:
-
-#   train_test:
-  
-# messages:
-#   dist_info:
-  
-#   dist_info_type:
-
-#   dist_msg:
-
-#   dist_msg_type:
-
-#   heat_info:
-
-#   heat_msg:
-
-# network:
-
-#   edges:
-  
-#   network:
-  
-#   nodes:
-  

@@ -278,8 +278,8 @@ def bubble_interprocess(phase: str = "train"):
     for i in range(M):
         xmin, xmax = X_sizes[i, :].min(), X_sizes[i, :].max()
         tmin, tmax = (
-            config.plots["bubble"]["size_factors"]["min_bubble_size"],
-            config.plots["bubble"]["size_factors"]["max_bubble_size"],
+            config.plots["bubble_plot"]["size_factors"]["min_bubble_size"],
+            config.plots["bubble_plot"]["size_factors"]["max_bubble_size"],
         )
         X_sizes[i, :] = (X_sizes[i, :] - xmin) / (xmax - xmin) * (tmax - tmin) + tmin
     x = []
@@ -417,10 +417,14 @@ def create_edges_df(msg_type: str = "SEND-LAYERS") -> DataFrame:
     return edges
 
 
-def create_nodes_df(metric: str = "accuracy") -> DataFrame:
-    nodes: DataFrame = load.train_dataset()
+def create_nodes_df(phase: str = "train", metric: str = "accuracy") -> DataFrame:
+    if phase == "train":
+        nodes: DataFrame = load.train_dataset()
+        nodes = nodes[nodes.epoch == 3]
+    else:
+        nodes: DataFrame = load.inference_dataset()
+        metric = f"{phase}_{metric}"
     nodes = nodes.rename(columns={"start_timestamp": "timestamp"})
-    nodes = nodes[nodes.epoch == 3]
     nodes = nodes[["agent", "timestamp", metric]]
     nodes["timestamp"] = pd.to_datetime(nodes.timestamp)
     nodes["timestamp"] = nodes.timestamp.dt.strftime("%Y/%m/%d %H:%M:%S")
@@ -432,8 +436,10 @@ def create_nodes_df(metric: str = "accuracy") -> DataFrame:
     return nodes
 
 
-def create_network_artifacts(metric: str = "accuracy", msg_type: str = "SEND-LAYERS"):
-    nodes = create_nodes_df(metric)
+def create_network_artifacts(
+    phase: str = "train", metric: str = "accuracy", msg_type: str = "SEND-LAYERS"
+):
+    nodes = create_nodes_df(phase, metric)
     edges = create_edges_df(msg_type)
     timestamps: List[float] = sorted(
         list(set(nodes.timestamp.to_list() + edges.timestamp.to_list()))

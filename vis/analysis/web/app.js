@@ -68,7 +68,6 @@ function capitalize(str) {
   const lowerCaseString = str.toLowerCase(), // convert string to lowercase  
   firstLetter = str.charAt(0).toUpperCase(), // uppercase the first character
   strWithoutFirstChar = lowerCaseString.slice(1); // remove first character from lowercase string 
-
   return firstLetter + strWithoutFirstChar; 
 }
 
@@ -76,6 +75,7 @@ async function load_arguments(plot){
     $.post(`http://localhost:10000/manager/plots/anova/get_args`, plot, function(data) {
     // console.log(`Finished: args_${plot}`)
      var f = document.getElementById(`form_${plot}`)
+      f.setAttribute("class", "form-control")
      var input = document.createElement("select");
       input.hidden = "hidden";
       input.name = "name"
@@ -90,8 +90,9 @@ async function load_arguments(plot){
     for (const parent in data){
       let textNode = document.createTextNode(`${capitalize(parent.replace("_", " "))}: `); 
       f.appendChild(textNode);
-      console.log(textNode)
       var selectList = document.createElement("select");
+      // selectList.setAttribute("data-style", "btn-primary")
+      selectList.className = "selectpicker"
       selectList.id = `${parent}_${plot}`;
       selectList.form = f.id
       selectList.name = parent
@@ -107,6 +108,7 @@ async function load_arguments(plot){
       f.appendChild(linebreak);
     }
     var s = document.createElement("input"); //input element, Submit button
+    s.setAttribute('class', "btn btn-primary")
     s.setAttribute('type',"submit");
     s.setAttribute('id',`sub_${plot}`);
     s.setAttribute('value',"Generate");

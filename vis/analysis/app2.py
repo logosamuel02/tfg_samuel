@@ -9,7 +9,13 @@ from spade.behaviour import CyclicBehaviour
 from visualization import plots
 
 
-from export import Config, get_figure, load_parameters, load_functions
+from export import (
+    Config,
+    get_figure,
+    load_parameters,
+    load_functions,
+    conversion_svg_figure,
+)
 
 config = Config()
 
@@ -56,7 +62,7 @@ async def GET_FIGURE(request):
     print("get", form)
     config = Config()
     filename = config.plots[form]["filename"]
-    filename = rf"figures/anova/{filename.replace(' ', '_')}.json"
+    filename = rf"figures/{filename.replace(' ', '_')}.json"
     return get_figure(filename)
 
 
@@ -70,7 +76,7 @@ async def GEN_FIGURE(request):
     gen_func = getattr(plots, pams[form["name"]])
     try:
         fig = gen_func(**form)
-        return filename, fig.to_html(full_html=False)
+        return filename, conversion_svg_figure(fig)
     except Exception as e:
         print("Error in generation:", e)
         return (

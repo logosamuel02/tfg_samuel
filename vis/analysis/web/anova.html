@@ -400,16 +400,15 @@
                 </nav> -->
           <!-- Reload -->
           <h1 class="h2">Plots</h1>
-          Reload figures
-          <label class="switch">
-            <input
-              type="checkbox"
+        <div style="height: 125px; width: 50%; float:left; align-items: center;">
+          <div class="form-check form-switch">
+            <label class="form-check-label" for="reload_cb"><b>Reload figures</b></label>
+            <input class="form-check-input" 
+              type="checkbox" 
               id="reload_cb"
               value="Hola"
-              onclick="reload();"
-            />
-            <span class="slider round" id="sl1"></span>
-          </label>
+              onclick="reload();">
+          </div>
 
           <div>
             <form id="fo">
@@ -424,17 +423,21 @@
               />
             </form>
           </div>
+          <div>
+            <i style="color: #0d6efd;">Switch on to automatically reload the latest generated figures</i>
+          </div>
+        </div>
           <!-- Regenerate -->
-          Regenerate figures
-          <label class="switch">
-            <input
+        <div style="height: 125px; width: 50%; float:left; align-items: center;">
+           <div class="form-check form-switch">
+            <label class="form-check-label" for="reload_cb"><b>Regenerate figures</b></label>
+            <input class="form-check-input" 
               type="checkbox"
               id="regen_cb"
               value="Hola"
               onclick="regenerate();"
             />
-            <span class="slider round" id="sl2"></span>
-          </label>
+          </div>
           <div>
             <form id="regen">
               <label for="regen_input">Seconds to regenerate:</label>
@@ -448,8 +451,11 @@
               />
             </form>
           </div>
+          <div>
+            <i style="color: #0d6efd;">Switch on to automatically regenerate new and updated figures</i> 
+          </div>
+        </div>
 
-          <div></div>
 
           <!-- CARDS -->
           <div id="card_containers"></div>
