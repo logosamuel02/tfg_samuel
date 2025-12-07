@@ -580,7 +580,7 @@ def create_combined_plot(
 
 def train_by_agent(metric: str = "accuracy", **karg) -> List[Figure]:
     train = load.train_dataset()
-    figs = []
+    train = train[train.algorithm_round <= 43]
     fig: Figure = px.line(
         train,
         x="algorithm_round",

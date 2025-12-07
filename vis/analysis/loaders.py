@@ -2,7 +2,17 @@ import pandas as pd
 from pathlib import Path
 from export import Config
 
-config = Config()
+paths = [
+    r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn/01_non_complete/raw",
+    r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn/02_non_complete/raw",
+    r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn/05_non_complete/raw",
+    r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn/10_non_complete/raw",
+]
+
+config = Config(
+    source_path=r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn",
+    experiment_path=paths[2],
+)
 
 
 def algorithm_dataset():

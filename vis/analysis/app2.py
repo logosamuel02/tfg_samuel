@@ -107,7 +107,7 @@ async def main():
     if not isExist:
         os.makedirs(folder)
     dummy = DummyAgent("dummy@localhost", "your_password")
-    print("DummyAgent started. Check its console to see the output.")
+    print("Observer1 started. Check its console to see the output.")
 
     ### MENU ENTRIES
 

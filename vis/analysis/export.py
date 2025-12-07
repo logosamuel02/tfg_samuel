@@ -146,7 +146,9 @@ class Config:
     source_path: DirectoryPath = (
         r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments"
     )
-    experiment_path: DirectoryPath = field(init=False)
+    experiment_path: DirectoryPath = (
+        r"C:/Users/samue/OneDrive/Escritorio/Tareas UNI/tfg/tfg_samuel/vis/xperiments/experimentos_con_cnn/05_non_complete/raw"  # field(init=False)
+    )
     output_path: str = "images"
     plots: str = r"config_files/layout.yml"
     variables: str = r"config_files/variables.yml"
@@ -154,9 +156,10 @@ class Config:
 
     def __post_init__(self):
         self.source_path: Path = Path(rf"{self.source_path}")
-        self.experiment_path: Path = (
-            self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
-        )
+        self.experiment_path: Path = Path(rf"{self.experiment_path}")
+        # self.experiment_path: Path = (
+        #     self.source_path / r"experimentos_con_cnn/05_non_complete/raw"
+        # )
         with open(rf"{self.plots}", "r") as file:
             self.plots = yaml.load(file, Loader=yaml.SafeLoader)
 
